@@ -1,6 +1,7 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
+const { existingRealPath, samePath } = require('./paths');
 
 function resolveRoots({ folders, env, home, cwd }) {
   if (folders.length > 0) return folders.map((folder) => ({ folder: path.resolve(cwd, folder), source: 'configured' }));
@@ -44,7 +45,7 @@ function pluginRoots(configDir, projectDir) {
   for (const [id, installs] of Object.entries(registry?.plugins ?? {})) {
     if (enabled[id] !== true || !Array.isArray(installs)) continue;
     const active = installs.filter((install) => typeof install?.installPath === 'string'
-      && (typeof install.projectPath !== 'string' || samePath(install.projectPath, projectDir)));
+      && (typeof install.projectPath !== 'string' || isProject(install.projectPath, projectDir)));
     if (active.length === 0) continue;
     const manifests = active.map((install) => ({
       install,
@@ -106,18 +107,9 @@ function readJson(file) {
   }
 }
 
-function samePath(a, b) {
-  return canonical(a) === canonical(b);
-}
-
-function canonical(p) {
-  let resolved;
-  try {
-    resolved = fs.realpathSync.native(p);
-  } catch {
-    resolved = path.resolve(p);
-  }
-  return process.platform === 'win32' ? resolved.toLowerCase() : resolved;
+function isProject(installedFor, projectDir) {
+  const canonical = (p) => existingRealPath(p) ?? path.resolve(p);
+  return samePath(canonical(installedFor), canonical(projectDir));
 }
 
 module.exports = { defaultRoots, projectDirOf, resolveRoots };
