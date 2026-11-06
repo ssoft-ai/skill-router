@@ -74,6 +74,13 @@ codex mcp add skill-router -- node <clone>/server.js
 
 Register a local server started by `node <clone>/server.js` over standard input and output.
 
+## Checks
+
+| Command | Checks |
+|---|---|
+| `node --test` | the units, and the ranking of the queries an agent wrote for the skills of `test/fixtures/catalog/` |
+| `evals/README.md` | whether Claude Code on Haiku loads a skill its listing does not show |
+
 ## Licence
 
 [MIT](LICENSE.md).
