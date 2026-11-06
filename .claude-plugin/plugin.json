@@ -1,0 +1,9 @@
+{
+  "name": "skill-router",
+  "description": "Finds the skills for a request among every installed skill source, including skills the session's skill list does not show",
+  "version": "0.1.0",
+  "author": { "name": "Andrei Stepanov" },
+  "homepage": "https://github.com/ssoft-ai/skill-router",
+  "repository": "https://github.com/ssoft-ai/skill-router",
+  "license": "MIT"
+}
