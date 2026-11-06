@@ -1,0 +1,1478 @@
+[
+ {
+  "query": "clean CSV file for pandas import: mixed date formats, stray quotes, trailing whitespace, repeated header rows",
+  "expect": "data-engineering/csv-cleaning/SKILL.md"
+ },
+ {
+  "query": "clean CSV file with mixed date formats, stray quotes, trailing whitespace, repeated header lines for pandas import",
+  "expect": "data-engineering/csv-cleaning/SKILL.md"
+ },
+ {
+  "query": "clean CSV file with mixed date formats, stray quotes, trailing whitespace, repeated header rows for pandas import",
+  "expect": "data-engineering/csv-cleaning/SKILL.md"
+ },
+ {
+  "query": "clean malformed CSV export for pandas loading, normalize dates, remove repeated headers",
+  "expect": "data-engineering/csv-cleaning/SKILL.md"
+ },
+ {
+  "query": "clean malformed CSV file for pandas import",
+  "expect": "data-engineering/csv-cleaning/SKILL.md"
+ },
+ {
+  "query": "clean malformed CSV file for pandas import data cleanup",
+  "expect": "data-engineering/csv-cleaning/SKILL.md"
+ },
+ {
+  "query": "clean malformed CSV file for pandas import with mixed date formats",
+  "expect": "data-engineering/csv-cleaning/SKILL.md"
+ },
+ {
+  "query": "clean messy CSV export for pandas import",
+  "expect": "data-engineering/csv-cleaning/SKILL.md"
+ },
+ {
+  "query": "clean messy CSV export for pandas: mixed date formats, stray quotes, trailing whitespace, repeated headers",
+  "expect": "data-engineering/csv-cleaning/SKILL.md"
+ },
+ {
+  "query": "clean messy CSV file for pandas import dates mixed formats",
+  "expect": "data-engineering/csv-cleaning/SKILL.md"
+ },
+ {
+  "query": "clean messy CSV file for pandas import, mixed date formats, stray quotes, trailing whitespace, repeated headers",
+  "expect": "data-engineering/csv-cleaning/SKILL.md"
+ },
+ {
+  "query": "data quality assertions for customers table row count null duplicate checks",
+  "expect": "data-engineering/data-quality-checks/SKILL.md"
+ },
+ {
+  "query": "data quality assertions for warehouse table before dashboard refresh",
+  "expect": "data-engineering/data-quality-checks/SKILL.md"
+ },
+ {
+  "query": "data quality assertions on customers table before daily sales dashboard refresh",
+  "expect": "data-engineering/data-quality-checks/SKILL.md"
+ },
+ {
+  "query": "data quality assertions on customers table before dashboard refresh",
+  "expect": "data-engineering/data-quality-checks/SKILL.md"
+ },
+ {
+  "query": "data quality assertions on customers table null emails duplicate keys row count drift check before dashboard refresh",
+  "expect": "data-engineering/data-quality-checks/SKILL.md"
+ },
+ {
+  "query": "data quality assertions on database table before dashboard refresh, scheduled check",
+  "expect": "data-engineering/data-quality-checks/SKILL.md"
+ },
+ {
+  "query": "data quality checks before dashboard refresh SQL table nulls duplicates row count threshold",
+  "expect": "data-engineering/data-quality-checks/SKILL.md"
+ },
+ {
+  "query": "data quality checks for customers table before dashboard refresh",
+  "expect": "data-engineering/data-quality-checks/SKILL.md"
+ },
+ {
+  "query": "data quality checks for customers table before dashboard refresh, fail pipeline on violations",
+  "expect": "data-engineering/data-quality-checks/SKILL.md"
+ },
+ {
+  "query": "data quality checks for database table before dashboard refresh: null emails, duplicate keys, row count drift",
+  "expect": "data-engineering/data-quality-checks/SKILL.md"
+ },
+ {
+  "query": "data quality checks on customers table before daily dashboard refresh",
+  "expect": "data-engineering/data-quality-checks/SKILL.md"
+ },
+ {
+  "query": "make Airflow DAG idempotent for safe reruns loading Shopify orders into Snowflake",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow DAG idempotent for safe reruns loading Snowflake",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow DAG idempotent for safe retries Shopify Snowflake load",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow DAG idempotent restartable load to Snowflake without duplicate rows",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow data pipeline idempotent rerun Snowflake load",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow load from Shopify to Snowflake idempotent rerunnable",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow Shopify to Snowflake load idempotent safe to rerun",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow Snowflake load idempotent for safe retries",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow Snowflake load idempotent on retry data pipeline",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow Snowflake load idempotent rerun safe merge",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow Snowflake load idempotent rerun without duplicate rows",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow Snowflake load idempotent rerunnable after partial failure",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow Snowflake load idempotent rerunnable data pipeline",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "make Airflow Snowflake load idempotent so reruns do not duplicate rows",
+  "expect": "data-engineering/etl-pipelines/SKILL.md"
+ },
+ {
+  "query": "alembic migration rename column add NOT NULL zero downtime production database",
+  "expect": "data-engineering/schema-migrations/SKILL.md"
+ },
+ {
+  "query": "alembic migration rename column add not null zero downtime rollback",
+  "expect": "data-engineering/schema-migrations/SKILL.md"
+ },
+ {
+  "query": "Alembic migration rename column add NOT NULL zero downtime rollback",
+  "expect": "data-engineering/schema-migrations/SKILL.md"
+ },
+ {
+  "query": "Alembic migration rename column and add NOT NULL with zero downtime and rollback",
+  "expect": "data-engineering/schema-migrations/SKILL.md"
+ },
+ {
+  "query": "Alembic zero-downtime column rename and NOT NULL constraint with rollback",
+  "expect": "data-engineering/schema-migrations/SKILL.md"
+ },
+ {
+  "query": "alembic zero-downtime migration rename column add not null rollback",
+  "expect": "data-engineering/schema-migrations/SKILL.md"
+ },
+ {
+  "query": "Alembic zero-downtime rename column and add NOT NULL constraint with rollback",
+  "expect": "data-engineering/schema-migrations/SKILL.md"
+ },
+ {
+  "query": "database migration rename column add NOT NULL zero downtime Alembic rollback",
+  "expect": "data-engineering/schema-migrations/SKILL.md"
+ },
+ {
+  "query": "rename database column without downtime alembic migration with rollback",
+  "expect": "data-engineering/schema-migrations/SKILL.md"
+ },
+ {
+  "query": "zero-downtime database migration Alembic rename column add NOT NULL",
+  "expect": "data-engineering/schema-migrations/SKILL.md"
+ },
+ {
+  "query": "zero-downtime database migration rename column NOT NULL Alembic rollback",
+  "expect": "data-engineering/schema-migrations/SKILL.md"
+ },
+ {
+  "query": "postgres table bloat dead tuples vacuum full reclaim disk space",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "PostgreSQL bloat dead tuples vacuum large table reclaim space without downtime",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "PostgreSQL bloat reclaim disk space large table dead tuples without long lock",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "PostgreSQL bloat table shrink without long lock dead tuples",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "PostgreSQL bloat vacuum table shrink without downtime",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "PostgreSQL table bloat dead tuples reclaim disk space without long lock",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "PostgreSQL table bloat dead tuples reclaim disk space without long locks",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "PostgreSQL table bloat dead tuples vacuum reclaim disk space without long lock",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "PostgreSQL table bloat dead tuples vacuum reclaim disk space without long locks",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "PostgreSQL table bloat dead tuples vacuum shrink table online",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "PostgreSQL table bloat dead tuples vacuum shrink table without downtime",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "PostgreSQL table bloat reclaim disk space without long locks",
+  "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md"
+ },
+ {
+  "query": "MySQL 8 slow query optimization monthly report aggregation index EXPLAIN",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "optimize MySQL slow query EXPLAIN index monthly revenue report orders table",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "optimize MySQL slow query with EXPLAIN on large table",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "optimize slow MySQL query EXPLAIN index for monthly revenue report",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "optimize slow MySQL query monthly report aggregation on large table",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "optimize slow MySQL query on large orders table using EXPLAIN and indexes",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "optimize slow MySQL query on large orders table with EXPLAIN",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "optimize slow MySQL query on large orders table with indexes",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "optimize slow MySQL query on large table with EXPLAIN",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "optimize slow MySQL query revenue report EXPLAIN index",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "optimize slow MySQL query with EXPLAIN and indexes",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "optimize slow MySQL query with index on large orders table",
+  "expect": "data-engineering/sql-query-tuning/SKILL.md"
+ },
+ {
+  "query": "document Flask REST API endpoints with parameters, response fields, error codes and curl examples",
+  "expect": "documents/api-reference-docs/SKILL.md"
+ },
+ {
+  "query": "document Flask REST API endpoints with parameters, responses, error codes and curl examples",
+  "expect": "documents/api-reference-docs/SKILL.md"
+ },
+ {
+  "query": "document Flask REST API endpoints with parameters, responses, errors and curl examples",
+  "expect": "documents/api-reference-docs/SKILL.md"
+ },
+ {
+  "query": "document Flask REST billing API endpoints parameters responses error codes curl examples",
+  "expect": "documents/api-reference-docs/SKILL.md"
+ },
+ {
+  "query": "document Flask REST billing API endpoints with parameters, responses, error codes and curl examples",
+  "expect": "documents/api-reference-docs/SKILL.md"
+ },
+ {
+  "query": "document REST API endpoints with parameters, responses, error codes and curl examples",
+  "expect": "documents/api-reference-docs/SKILL.md"
+ },
+ {
+  "query": "document REST API endpoints with parameters, responses, errors and curl examples",
+  "expect": "documents/api-reference-docs/SKILL.md"
+ },
+ {
+  "query": "fill IRS W-9 PDF form fields and lock them for contractors from JSON",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill IRS W-9 PDF form fields from JSON and flatten to lock them",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill IRS W-9 PDF form fields from JSON and lock the fields",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill IRS W-9 PDF form for contractors from JSON and lock form fields",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill IRS W-9 PDF forms from JSON data and lock fields",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill IRS W-9 PDF forms from JSON data and lock form fields",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill PDF form fields and lock them read-only",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill PDF form fields and lock them, batch from JSON data",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill PDF form fields and lock them, W-9 tax form generation from JSON",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill PDF form fields and lock them, W-9 tax forms from JSON data",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill PDF form fields for many contractors and lock them",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill PDF form fields for many records and flatten or lock them",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill PDF form fields from JSON and lock them",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill PDF form fields from JSON data and flatten or lock them",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "fill PDF form fields from JSON data and lock them",
+  "expect": "documents/pdf-forms/SKILL.md"
+ },
+ {
+  "query": "release notes from merged pull requests since last tag",
+  "expect": "documents/release-notes/SKILL.md"
+ },
+ {
+  "query": "release notes from merged pull requests since last tag for end users",
+  "expect": "documents/release-notes/SKILL.md"
+ },
+ {
+  "query": "release notes from merged pull requests since last tag for user-facing changelog",
+  "expect": "documents/release-notes/SKILL.md"
+ },
+ {
+  "query": "release notes from merged pull requests since last tag, end-user changelog",
+  "expect": "documents/release-notes/SKILL.md"
+ },
+ {
+  "query": "release notes from merged pull requests since last tag, end-user what's new summary",
+  "expect": "documents/release-notes/SKILL.md"
+ },
+ {
+  "query": "release notes from merged pull requests since last tag, user-facing changelog",
+  "expect": "documents/release-notes/SKILL.md"
+ },
+ {
+  "query": "release notes from merged pull requests since last tag, user-facing changelog grouped by features fixes known issues",
+  "expect": "documents/release-notes/SKILL.md"
+ },
+ {
+  "query": "release notes from merged pull requests since last tag, user-facing summary",
+  "expect": "documents/release-notes/SKILL.md"
+ },
+ {
+  "query": "create 10-slide PowerPoint deck from churn report with charts and speaker notes",
+  "expect": "documents/slide-decks/SKILL.md"
+ },
+ {
+  "query": "create PowerPoint presentation from churn report with charts and speaker notes",
+  "expect": "documents/slide-decks/SKILL.md"
+ },
+ {
+  "query": "create PowerPoint slide deck from churn report for board meeting with speaker notes and chart",
+  "expect": "documents/slide-decks/SKILL.md"
+ },
+ {
+  "query": "create PowerPoint slides deck with chart and speaker notes from report",
+  "expect": "documents/slide-decks/SKILL.md"
+ },
+ {
+  "query": "create PowerPoint slides from churn report with chart and speaker notes",
+  "expect": "documents/slide-decks/SKILL.md"
+ },
+ {
+  "query": "create PowerPoint slides from churn report with charts and speaker notes",
+  "expect": "documents/slide-decks/SKILL.md"
+ },
+ {
+  "query": "create PowerPoint slides from quarterly churn report with chart and speaker notes",
+  "expect": "documents/slide-decks/SKILL.md"
+ },
+ {
+  "query": "create PowerPoint slides from report with chart and speaker notes",
+  "expect": "documents/slide-decks/SKILL.md"
+ },
+ {
+  "query": "create PowerPoint slides with charts and speaker notes from quarterly churn report",
+  "expect": "documents/slide-decks/SKILL.md"
+ },
+ {
+  "query": "fix Excel VLOOKUP #N/A approximate match tier lookup commission rates",
+  "expect": "documents/spreadsheet-formulas/SKILL.md"
+ },
+ {
+  "query": "fix Excel VLOOKUP #N/A approximate match tier lookup workbook",
+  "expect": "documents/spreadsheet-formulas/SKILL.md"
+ },
+ {
+  "query": "fix Excel VLOOKUP approximate match commission rate tiers",
+  "expect": "documents/spreadsheet-formulas/SKILL.md"
+ },
+ {
+  "query": "fix Excel VLOOKUP approximate match commission tier lookup returning N/A",
+  "expect": "documents/spreadsheet-formulas/SKILL.md"
+ },
+ {
+  "query": "fix Excel VLOOKUP approximate match tier lookup returning N/A",
+  "expect": "documents/spreadsheet-formulas/SKILL.md"
+ },
+ {
+  "query": "fix Excel VLOOKUP approximate match tier rates workbook",
+  "expect": "documents/spreadsheet-formulas/SKILL.md"
+ },
+ {
+  "query": "fix Excel VLOOKUP approximate match tier table commission rates",
+  "expect": "documents/spreadsheet-formulas/SKILL.md"
+ },
+ {
+  "query": "fix Excel VLOOKUP returning N/A approximate match tier lookup workbook",
+  "expect": "documents/spreadsheet-formulas/SKILL.md"
+ },
+ {
+  "query": "Android AGP 8.5 upgrade duplicate class kotlin collections jdk8 build fix",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "Android Gradle plugin upgrade duplicate class kotlin collections jdk8 release build",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "fix Android Gradle build duplicate class kotlin collections jdk8 after AGP 8.5 upgrade, rebuild release APK",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "fix Android Gradle build duplicate class kotlin jdk8 after AGP upgrade assembleRelease",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "fix Android Gradle duplicate class kotlin collections jdk8 after AGP 8.5 upgrade",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "fix Android Gradle duplicate class kotlin collections jdk8 after AGP 8.5 upgrade release build",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "fix Android Gradle duplicate class kotlin collections jdk8 after AGP 8.5 upgrade, rebuild release APK",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "fix Android Gradle duplicate class kotlin collections jdk8 after AGP upgrade",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "fix Android Gradle duplicate class kotlin collections jdk8 AGP 8.5 release APK build",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "fix Android Gradle duplicate class kotlin collections jdk8 AGP 8.5 release build",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "fix Android Gradle plugin 8.5 duplicate kotlin collections jdk8 class assembleRelease",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "fix Gradle duplicate class kotlin jdk8 after Android Gradle Plugin upgrade, build release APK",
+  "expect": "mobile/android-builds/SKILL.md"
+ },
+ {
+  "query": "build and publish Android and iOS app to store review with staged rollout and screenshots",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "build and publish mobile app to App Store and Google Play with screenshots and review notes",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "build and publish mobile app to App Store and Google Play with screenshots and staged rollout",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "build and publish mobile app to Apple App Store and Google Play with screenshots and staged rollout",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "build and submit mobile app to App Store and Google Play with screenshots and staged rollout",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "build and submit mobile app to App Store and Google Play with staged rollout and review notes screenshots",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "build and submit mobile app to Apple App Store and Google Play staged rollout with screenshots and review notes",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "build and submit mobile app to Apple App Store review and Google Play staged rollout with screenshots and review notes",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "prepare app store screenshots, reviewer notes, upload Android and iOS builds, Google Play staged rollout",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "publish Android and iOS app store release with screenshots, review notes and staged rollout",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "publish mobile app release to Apple App Store review and Google Play staged rollout with screenshots and review notes",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "publish mobile app to App Store and Google Play with screenshots, review notes, staged rollout",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "publish mobile app to Apple App Store and Google Play release with screenshots and review notes",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "publish mobile app to Apple App Store and Google Play with screenshots, review notes, staged rollout",
+  "expect": "mobile/app-store-release/SKILL.md"
+ },
+ {
+  "query": "fastlane iOS code signing distribution certificate provisioning profile renewal CI",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS code signing certificate and provisioning profiles renewal with fastlane on CI",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS code signing certificate provisioning profile fastlane CI",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS code signing distribution certificate provisioning profile fastlane CI",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS code signing distribution certificate provisioning profile fastlane CI Mac",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS code signing distribution certificate provisioning profile fastlane CI renew",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS code signing distribution certificate provisioning profile renew fastlane CI",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS code signing fastlane distribution certificate provisioning profile renewal CI",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS distribution certificate and provisioning profile renewal for fastlane CI",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS distribution certificate and provisioning profile renewal for fastlane CI build",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS distribution certificate provisioning profile fastlane ipa CI renew",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS distribution certificate provisioning profile fastlane match Xcode archive CI",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS distribution certificate provisioning profile renew fastlane match CI",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "iOS fastlane code signing distribution certificate provisioning profile renew archive ipa",
+  "expect": "mobile/ios-signing/SKILL.md"
+ },
+ {
+  "query": "offline-first Expo app sync report edits merge conflicts",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first mobile app sync edits merge conflicts Expo React Native",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first mobile app sync with conflict resolution Expo React Native",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first mobile Expo app sync edits with conflict resolution",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first sync for Expo app with conflict merge",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first sync for Expo app with conflict resolution merge on reconnect",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first sync of edited reports with conflict merge in Expo app",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first sync of edited reports with conflict-free merge after reconnect",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first sync of edits in Expo app with conflict merge on reconnect",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first sync of edits in Expo app with conflict merge to server",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first sync of edits with conflict merge for Expo mobile app",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first sync of edits with conflict resolution for Expo app",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first sync of edits with conflict resolution for Expo mobile app",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "offline-first sync of edits with conflict resolution in Expo mobile app",
+  "expect": "mobile/offline-sync/SKILL.md"
+ },
+ {
+  "query": "debug Firebase Cloud Messaging iOS push notifications missing after FCM HTTP v1 migration Flutter",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "debug Flutter FCM push notifications missing on iOS APNs",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "debug Flutter Firebase Cloud Messaging iOS push notifications missing after HTTP v1 migration",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "debug Flutter iOS push notifications missing after FCM HTTP v1 migration",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "debug Flutter push notifications iOS missing FCM HTTP v1 API migration",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "debug iOS push notifications missing after FCM HTTP v1 migration Flutter",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "debug iOS push notifications not received after FCM HTTP v1 migration Flutter",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "fix Flutter iOS push notifications FCM HTTP v1 APNs missing",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "Flutter FCM push notifications iOS not received after FCM HTTP v1 migration",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "Flutter iOS push notifications FCM HTTP v1 APNs missing",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "Flutter iOS push notifications FCM HTTP v1 APNs not delivered",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "Flutter iOS push notifications missing after migrating to FCM HTTP v1 API",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "Flutter iOS push notifications not received after FCM HTTP v1 migration",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "Flutter iOS push notifications not received after migrating to FCM HTTP v1 API",
+  "expect": "mobile/push-notifications/SKILL.md"
+ },
+ {
+  "query": "reduce alert noise Prometheus CPU alert flapping on-call without missing real incidents",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "reduce alert noise Prometheus CPU alert on-call flapping",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "reduce noisy Prometheus alerts for on-call paging",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "reduce noisy Prometheus alerts paging on-call CPU threshold",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "reduce noisy Prometheus CPU alert paging on-call",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "reduce noisy Prometheus CPU alert paging on-call without missing real incidents",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "reduce noisy Prometheus CPU alerts for on-call without missing outages",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "reduce noisy Prometheus CPU alerts on-call paging",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "reduce noisy Prometheus CPU alerts without missing real outages",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "reduce Prometheus CPU alert noise flapping on-call",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "tune Prometheus alert rules to reduce flapping CPU alerts on-call noise",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "tune Prometheus CPU alert noise without missing real outages",
+  "expect": "operations/alert-tuning/SKILL.md"
+ },
+ {
+  "query": "restore dropped MySQL table from nightly dump and binlog point-in-time recovery",
+  "expect": "operations/backup-restore/SKILL.md"
+ },
+ {
+  "query": "restore dropped MySQL table from nightly dump and binlog point-in-time recovery production",
+  "expect": "operations/backup-restore/SKILL.md"
+ },
+ {
+  "query": "restore dropped MySQL table from S3 dump and binlog point-in-time recovery",
+  "expect": "operations/backup-restore/SKILL.md"
+ },
+ {
+  "query": "restore MySQL table from nightly dump and binlog point-in-time recovery",
+  "expect": "operations/backup-restore/SKILL.md"
+ },
+ {
+  "query": "restore MySQL table from nightly S3 dump and binlog point-in-time recovery",
+  "expect": "operations/backup-restore/SKILL.md"
+ },
+ {
+  "query": "restore MySQL table from nightly S3 dump and binlog point-in-time recovery production",
+  "expect": "operations/backup-restore/SKILL.md"
+ },
+ {
+  "query": "restore MySQL table from S3 dump and binlog point-in-time recovery",
+  "expect": "operations/backup-restore/SKILL.md"
+ },
+ {
+  "query": "restore MySQL table from S3 dump and binlog point-in-time recovery production",
+  "expect": "operations/backup-restore/SKILL.md"
+ },
+ {
+  "query": "restore MySQL table from S3 nightly dump and binlog point-in-time recovery after accidental DROP",
+  "expect": "operations/backup-restore/SKILL.md"
+ },
+ {
+  "query": "restore MySQL table from S3 nightly dump and binlog point-in-time recovery after accidental drop in production",
+  "expect": "operations/backup-restore/SKILL.md"
+ },
+ {
+  "query": "production incident checkout 502 containment on-call recovery",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production incident checkout 502 errors on-call mitigation",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production incident checkout 502 errors on-call mitigation rollback",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production incident checkout 502 errors recovery on-call",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production incident checkout 502 errors rollback on-call recovery",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production incident response 502 errors checkout service on-call recovery",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production incident response checkout 502 errors mitigation rollback",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production incident response checkout 502 errors on-call triage mitigation communication",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production incident response checkout 502 on-call mitigation",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production incident response checkout 502 on-call recovery",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production incident response checkout returning 502 on-call mitigation",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production incident response on-call checkout 502 outage mitigation",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production outage checkout 502 incident response mitigation",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production outage incident response checkout 502 rollback on-call",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "production outage incident response on-call 502 errors recovery",
+  "expect": "operations/incident-response/SKILL.md"
+ },
+ {
+  "query": "fix Kubernetes deployment manifests so rollout waits for readiness and rolls back automatically",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "fix Kubernetes deployment rollout readiness probe auto rollback manifests",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "fix Kubernetes EKS deployment manifests so rollout waits for readiness and auto rolls back on CrashLoopBackOff",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "kubernetes deployment readiness probe rollback manifests",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "Kubernetes deployment readiness probe rollback manifests EKS",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "Kubernetes deployment readiness probe rolling update rollback manifests",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "Kubernetes deployment rolling update wait for readiness and auto rollback on failed pods",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "Kubernetes deployment rolling update wait for readiness and automatic rollback on failure",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "kubernetes deployment rollout readiness probe auto rollback manifests",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "Kubernetes deployment rollout readiness probe automatic rollback",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "Kubernetes deployment rollout readiness probe rollback EKS manifests",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "kubernetes deployment rollout readiness probe rollback manifests",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "kubernetes deployment rollout readiness probes rollback EKS manifests",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "Kubernetes deployment rollout waits for readiness and rolls back automatically on crashloop",
+  "expect": "operations/kubernetes-deployments/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access log 429 errors by client IP and endpoint, correlate with cron job timing",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access log 429 errors by client IP and endpoint, correlate with cron timing",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access log for 429 error spike and correlate with cron job",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access log for 429 errors by client IP and endpoint, correlate with cron job",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access log to find clients and endpoints causing 429 spike and correlate with cron job",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access log to find clients and endpoints causing HTTP 429 errors and correlate with cron job timing",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access logs for 429 error spike and correlate with cron job",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access logs for 429 rate limit bursts and correlate with cron job",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access logs for 429 rate limit bursts and cron correlation",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access logs for 429 rate limit errors by client IP and endpoint, correlate with cron job",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access logs for 429 rate-limit errors by client IP and endpoint, correlate with cron job",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "analyze nginx access logs for HTTP 429 spike by client IP and endpoint, correlate with cron job timing",
+  "expect": "operations/log-analysis/SKILL.md"
+ },
+ {
+  "query": "audit GitHub org admins and AWS account admin access for SOC 2 evidence",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "audit GitHub org admins and AWS account admin users for SOC 2 access review",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "audit GitHub org and AWS admin access for SOC 2 evidence",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "SOC 2 access review list admin users GitHub organization AWS accounts",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "SOC 2 access review list GitHub org admins and AWS account admin users inactive 90 days",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "SOC 2 access review list GitHub org admins and AWS account admin users with inactivity flags",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "SOC 2 access review list GitHub org admins and AWS account admins with inactivity check",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "SOC 2 access review list GitHub org admins and AWS admin users with last-used activity",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "SOC 2 access review list GitHub org admins and AWS IAM admins with inactivity",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "SOC 2 access review list GitHub org and AWS account admins with inactivity",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "SOC 2 access review list GitHub org and AWS admin users, flag inactive accounts",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "SOC 2 access review listing GitHub org admins and AWS IAM users with inactivity",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "SOC 2 quarterly access review GitHub org admins AWS accounts",
+  "expect": "security/access-review/SKILL.md"
+ },
+ {
+  "query": "audit npm dependencies vulnerabilities reachability and safe upgrade Next.js",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "audit npm dependency vulnerabilities, check exploitability in Next.js app, upgrade packages without breaking build",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "audit npm vulnerabilities and upgrade exploitable dependencies in Next.js app",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "audit npm vulnerabilities reachability and update dependencies safely in Next.js app",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "audit npm vulnerabilities, assess exploitability, upgrade dependencies safely in Next.js app",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "audit npm vulnerabilities, determine exploitability, update dependencies safely Next.js",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "npm audit dependency vulnerabilities Next.js update without breaking build",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "npm audit fix dependency vulnerabilities Next.js upgrade",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "npm audit fix dependency vulnerabilities upgrade Next.js without breaking build",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "npm audit vulnerabilities triage and dependency updates Next.js",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "update npm dependencies to fix audit vulnerabilities in Next.js app without breaking build",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "update npm dependencies to fix audit vulnerabilities without breaking build",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "update npm dependencies with vulnerabilities, check exploitability, keep build working",
+  "expect": "security/dependency-audit/SKILL.md"
+ },
+ {
+  "query": "find leaked AWS credentials and tokens in git history and add pre-commit secret scanning hook",
+  "expect": "security/secret-scanning/SKILL.md"
+ },
+ {
+  "query": "find leaked credentials in git history and add pre-commit secret scanning hook",
+  "expect": "security/secret-scanning/SKILL.md"
+ },
+ {
+  "query": "find leaked credentials secrets in git history and add pre-commit secret scanning hook",
+  "expect": "security/secret-scanning/SKILL.md"
+ },
+ {
+  "query": "find leaked secrets credentials in git history and install pre-commit hook",
+  "expect": "security/secret-scanning/SKILL.md"
+ },
+ {
+  "query": "find leaked secrets in git history and add pre-commit hook",
+  "expect": "security/secret-scanning/SKILL.md"
+ },
+ {
+  "query": "find leaked secrets in git history and add pre-commit hook to block credentials",
+  "expect": "security/secret-scanning/SKILL.md"
+ },
+ {
+  "query": "scan git history for leaked AWS credentials and tokens, add pre-commit secret detection hook",
+  "expect": "security/secret-scanning/SKILL.md"
+ },
+ {
+  "query": "scan git history for leaked credentials and add pre-commit secret detection hook",
+  "expect": "security/secret-scanning/SKILL.md"
+ },
+ {
+  "query": "scan git history for leaked secrets and add pre-commit hook",
+  "expect": "security/secret-scanning/SKILL.md"
+ },
+ {
+  "query": "scan git history for leaked secrets and add pre-commit hook to block credentials",
+  "expect": "security/secret-scanning/SKILL.md"
+ },
+ {
+  "query": "scan git history for leaked secrets and add pre-commit secret detection hook",
+  "expect": "security/secret-scanning/SKILL.md"
+ },
+ {
+  "query": "security review of external file sharing link feature threat model",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "security review of external file sharing links threat model",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "security review of file sharing feature with external guest links",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "security review of file sharing via external guest links",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "security review of file sharing via external guest links threat model",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "security review of link sharing feature exposing project files to external guests",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "security review of link-based file sharing with external guests threat model",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "security review of shareable file links for external guests",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "security review of shared file links for external guests threat model",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "security threat model for file sharing via external guest links",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "threat model external guest link file sharing security review",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "threat model for shareable file links to external guests",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "threat model security review for shareable file links to external guests",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "threat model security review of file sharing links with external guests",
+  "expect": "security/threat-modelling/SKILL.md"
+ },
+ {
+  "query": "fix Let's Encrypt certificate renewal on nginx server and make it reliable",
+  "expect": "security/tls-certificates/SKILL.md"
+ },
+ {
+  "query": "renew Let's Encrypt certificate nginx certbot auto-renewal fix",
+  "expect": "security/tls-certificates/SKILL.md"
+ },
+ {
+  "query": "renew Let's Encrypt certificate nginx fix auto-renewal",
+  "expect": "security/tls-certificates/SKILL.md"
+ },
+ {
+  "query": "renew Let's Encrypt certificate nginx fix auto-renewal linux server",
+  "expect": "security/tls-certificates/SKILL.md"
+ },
+ {
+  "query": "renew Let's Encrypt certificate nginx fix broken auto-renewal",
+  "expect": "security/tls-certificates/SKILL.md"
+ },
+ {
+  "query": "renew Let's Encrypt certificate nginx fix certbot auto-renewal",
+  "expect": "security/tls-certificates/SKILL.md"
+ },
+ {
+  "query": "renew Let's Encrypt certificate nginx fix failed auto-renewal",
+  "expect": "security/tls-certificates/SKILL.md"
+ },
+ {
+  "query": "renew Let's Encrypt certificate nginx fix failed automatic renewal",
+  "expect": "security/tls-certificates/SKILL.md"
+ },
+ {
+  "query": "renew Let's Encrypt certificate nginx server fix automatic renewal",
+  "expect": "security/tls-certificates/SKILL.md"
+ },
+ {
+  "query": "accessibility audit checkout flow screen reader WCAG 2.2 AA",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "accessibility audit checkout pages WCAG 2.2 AA screen reader VoiceOver",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "accessibility audit checkout VoiceOver WCAG 2.2 AA",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "accessibility audit checkout WCAG 2.2 AA screen reader VoiceOver web forms",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "accessibility audit checkout web page screen reader WCAG 2.2 AA",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "accessibility audit WCAG 2.2 AA checkout screen reader VoiceOver",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "WCAG 2.2 AA accessibility audit checkout screen reader VoiceOver",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "WCAG 2.2 AA accessibility audit of checkout page for screen reader VoiceOver",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "WCAG 2.2 AA accessibility audit of checkout page screen reader VoiceOver",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "WCAG 2.2 AA accessibility audit of checkout pages for screen reader VoiceOver",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "WCAG 2.2 AA accessibility audit of checkout pages screen reader VoiceOver",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "WCAG 2.2 AA accessibility audit of checkout pages with screen reader",
+  "expect": "web-development/accessibility-audit/SKILL.md"
+ },
+ {
+  "query": "fix responsive CSS layout sidebar overlap pricing cards flexbox grid wrap",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "fix responsive CSS sidebar overlap and pricing cards wrap flexbox grid",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "fix responsive pricing page layout sidebar overlap flexbox grid cards wrap",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "fix responsive pricing page sidebar overlap cards stack flexbox grid",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "fix responsive pricing page sidebar overlap flexbox grid stack cards",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "responsive CSS fix pricing page sidebar overlap flexbox grid stack cards",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "responsive CSS fix pricing page sidebar overlap flexbox grid stack plan cards",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "responsive CSS fix pricing page sidebar overlap flexbox grid stacking cards",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "responsive CSS fix pricing page sidebar overlay stack cards flexbox grid",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "responsive CSS fix sidebar overlap pricing cards flexbox grid stack below 768px",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "responsive CSS flexbox grid stack sidebar pricing cards mobile",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "responsive CSS layout stack pricing cards sidebar flexbox grid mobile",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "responsive CSS layout stack sidebar and pricing cards below 768px",
+  "expect": "web-development/css-layout/SKILL.md"
+ },
+ {
+  "query": "form validation registration email phone client and server side",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "form validation registration email phone inline error server-side validation",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "form validation registration email phone server-side validation inline errors",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "registration form client and server validation email phone input errors",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "registration form inline field validation client and server email phone",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "registration form validation email phone client and server side inline error messages",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "server-side and client-side form validation of registration fields email phone",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "signup form inline validation email phone server-side validation",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "signup form validation email phone inline errors client and server",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "signup form validation inline errors email phone server-side validation",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "validate registration form email and phone input client and server side",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "web form client-side validation with inline errors and server-side validation",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "web form validation registration email phone client and server side",
+  "expect": "web-development/form-validation/SKILL.md"
+ },
+ {
+  "query": "unit testing React component with Jest tests",
+  "expect": "web-development/react-components/react-testing/SKILL.md"
+ },
+ {
+  "query": "unit tests for React component with Jest",
+  "expect": "web-development/react-components/react-testing/SKILL.md"
+ },
+ {
+  "query": "unit tests for React component with Jest and testing library",
+  "expect": "web-development/react-components/react-testing/SKILL.md"
+ },
+ {
+  "query": "write Jest unit tests for React component",
+  "expect": "web-development/react-components/react-testing/SKILL.md"
+ },
+ {
+  "query": "write Jest unit tests for React component ProductCard button disabled and click handler",
+  "expect": "web-development/react-components/react-testing/SKILL.md"
+ },
+ {
+  "query": "write Jest unit tests for React component ProductCard disabled button",
+  "expect": "web-development/react-components/react-testing/SKILL.md"
+ },
+ {
+  "query": "write Jest unit tests for React component ProductCard disabled button and click handler",
+  "expect": "web-development/react-components/react-testing/SKILL.md"
+ },
+ {
+  "query": "write Jest unit tests for React component render, disabled button, click handler",
+  "expect": "web-development/react-components/react-testing/SKILL.md"
+ },
+ {
+  "query": "React date range picker component TypeScript hooks Next.js",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "React DateRangePicker component hooks TSX Next.js",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "React DateRangePicker component TSX hooks Next.js dashboard",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "React DateRangePicker component TypeScript hooks Next.js dashboard",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "React TSX date range picker component with hooks for Next.js",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "React TypeScript date range picker component for Next.js dashboard",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "React TypeScript date range picker component Next.js dashboard",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "React TypeScript date range picker component with hooks for Next.js dashboard",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "React TypeScript reusable date range picker component with hooks for Next.js dashboard",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "reusable React date range picker component TSX hooks Next.js",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "reusable React date range picker component TSX Next.js dashboard with minDate maxDate hooks",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "reusable React date range picker component TypeScript hooks Next.js",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "reusable React date range picker TSX hooks Next.js dashboard",
+  "expect": "web-development/react-components/SKILL.md"
+ },
+ {
+  "query": "reusable React DateRangePicker TSX hooks Next.js component",
+  "expect": "web-development/react-components/SKILL.md"
+ }
+]

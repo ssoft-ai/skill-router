@@ -1,0 +1,11 @@
+{
+  "name": "skill-router",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Finds the skills for a request among every installed skill source, for any agent reading Agent Skills",
+  "license": "MIT",
+  "author": "Andrei Stepanov",
+  "repository": "github:ssoft-ai/skill-router",
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node --test" }
+}
