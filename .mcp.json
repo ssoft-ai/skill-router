@@ -2,7 +2,8 @@
   "mcpServers": {
     "skill-router": {
       "command": "node",
-      "args": ["${CLAUDE_PLUGIN_ROOT}/server.js"]
+      "args": ["${CLAUDE_PLUGIN_ROOT}/server.js"],
+      "alwaysLoad": true
     }
   }
 }

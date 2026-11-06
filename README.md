@@ -60,6 +60,9 @@ claude plugin marketplace add ssoft-ai/marketplace
 claude plugin install skill-router@ssoft-ai
 ```
 
+The plugin loads both tools into every session and adds to each request a reminder to search
+the skills, in English words, before any other tool.
+
 ### Codex
 
 ```sh
