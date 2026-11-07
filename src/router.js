@@ -20,8 +20,9 @@ const SEARCH_DEFINITION = {
     properties: {
       query: {
         type: 'string',
-        description: 'The task in a few English words - what is to be done and with what. Write it in English even '
-          + 'when the request is in another language.',
+        description: 'The task in a few English words - what is to be done and with what, naming the language and '
+          + 'the kind of file the task works on, as a task on the tests of a Python module names "Python" and '
+          + '"test". Write it in English even when the request is in another language.',
       },
       limit: { type: 'integer', minimum: 1, maximum: MAX_LIMIT, description: 'The most names to return; 10 when omitted.' },
     },

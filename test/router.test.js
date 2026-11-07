@@ -24,6 +24,11 @@ test('offers a search tool and a load tool', () => {
   assert.deepStrictEqual(tools.map((t) => t.name), ['search_skills', 'load_skill']);
 });
 
+test('asks for the language and the kind of file the task works on in the query', () => {
+  const { tools } = router.handle({ jsonrpc: '2.0', id: 1, method: 'tools/list' }).result;
+  assert.match(tools[0].inputSchema.properties.query.description, /language and the kind of file/);
+});
+
 const writeSkill = (folder, name, description, paths, instructions = '') => {
   fs.mkdirSync(path.join(folder, name), { recursive: true });
   const metadata = paths ? `metadata:\n  paths: "${paths}"\n` : '';
