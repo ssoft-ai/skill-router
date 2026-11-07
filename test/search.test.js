@@ -3,7 +3,7 @@ const { test } = require('node:test');
 const assert = require('node:assert');
 const { search } = require('../src/search');
 
-const skill = (name, description, metadata = {}) => ({ name, description, metadata, path: `/skills/${name}/SKILL.md`, folder: `/skills/${name}` });
+const skill = (name, description, metadata = {}, body = '') => ({ name, description, metadata, body, path: `/skills/${name}/SKILL.md`, folder: `/skills/${name}` });
 
 const skills = [
   skill('commit-rules', 'Apply when writing or reviewing commit messages or naming branches'),
@@ -25,6 +25,19 @@ test('finds a skill described in another language that spaces its words by a req
   ];
   const found = described.map(([lang, description, query]) => search([...skills, skill(lang, description)], query)[0]?.name);
   assert.deepStrictEqual(found, described.map(([lang]) => lang));
+});
+
+test('finds a skill by a word only its instructions write', () => {
+  const bisect = skill('history-search', 'Apply when a defect has to be traced to a change', {}, 'Run git bisect between a good and a bad tag.');
+  const results = search([...skills, bisect], 'bisect');
+  assert.deepStrictEqual(results.map((r) => r.name), ['history-search']);
+});
+
+test('ranks a skill writing a query word in its description above one writing it only in its instructions', () => {
+  const described = skill('tagging', 'Apply when a version tag is created');
+  const mentioned = skill('notes', 'Apply when notes are written', {}, 'Name the version tag in the title.');
+  const results = search([mentioned, described], 'version tag');
+  assert.deepStrictEqual(results.map((r) => r.name), ['tagging', 'notes']);
 });
 
 test('ranks a skill whose paths match a project file above an otherwise equal one', () => {

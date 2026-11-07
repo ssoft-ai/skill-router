@@ -28,6 +28,12 @@ test('holds every SKILL.md under a folder, at any depth', () => {
   );
 });
 
+test('holds the instructions of a skill, the text below its frontmatter', () => {
+  writeSkill(path.join(dir, 'body', 'notes'), 'notes');
+  const index = buildIndex([{ folder: path.join(dir, 'body'), source: 'test' }]);
+  assert.deepStrictEqual(index.skills.map((s) => s.body), ['\nBody of notes.\n']);
+});
+
 test('keeps two skills of the same name, each under its path', () => {
   const one = writeSkill(path.join(dir, 'same', 'a', 'planning'), 'planning');
   const two = writeSkill(path.join(dir, 'same', 'b', 'planning'), 'planning');

@@ -69,8 +69,9 @@ const text = (value) => (typeof value === 'string' ? value : '');
 
 function readSkill(file, source) {
   let data;
+  let body;
   try {
-    data = parseSkillFile(fs.readFileSync(file, 'utf8')).data;
+    ({ data, body } = parseSkillFile(fs.readFileSync(file, 'utf8')));
   } catch {
     return null;
   }
@@ -78,6 +79,7 @@ function readSkill(file, source) {
   return {
     name: text(data?.name) || path.basename(path.dirname(file)),
     description: text(data?.description),
+    body,
     metadata: metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata : {},
     path: file,
     folder: path.dirname(file),

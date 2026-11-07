@@ -14,6 +14,10 @@ those the listing leaves out included; the listing itself stays as the agent bui
 | `search_skills` | `query` - the task in a few English words; `limit` - 1 to 20, 10 by default | the best matching skills, each with its name, path and description; copies of one skill, same name and description, as one result whose `otherPaths` lists the rest |
 | `load_skill` | `path` - a path `search_skills` returned | the skill's `SKILL.md` and the path of its folder |
 
+The search ranks a skill by the words its name, its description and its instructions share with
+the query: a word of the name weighs most, a word of the instructions least, so a skill is found by
+a term only its instructions use and still ranks below one whose description names that term.
+
 The agent writes the query, so a request in another language reaches skills described in English
 as an English query. A skill described in another language is found by a query in that language
 where the language spaces its words; Chinese or Japanese text matches only as a whole unbroken run.
