@@ -17,6 +17,8 @@ those the listing leaves out included; the listing itself stays as the agent bui
 The search ranks a skill by the words its name, its description and its instructions share with
 the query: a word of the name weighs most, a word of the instructions least, so a skill is found by
 a term only its instructions use and still ranks below one whose description names that term.
+A common abbreviation of software work and its full form count as one word - `PR` and pull
+request, `CI` and continuous integration, `k8s` and Kubernetes; `src/abbreviations.js` lists them.
 
 The agent writes the query, so a request in another language reaches skills described in English
 as an English query. A skill described in another language is found by a query in that language

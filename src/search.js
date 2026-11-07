@@ -1,4 +1,5 @@
 'use strict';
+const { ABBREVIATIONS } = require('./abbreviations');
 const { matchesGlob } = require('./glob');
 const { stem } = require('./stem');
 
@@ -28,24 +29,53 @@ const FIELDS = [
   { text: (skill) => skill.body ?? '', weight: 0.2 },
 ];
 
-function fieldCounts(text) {
+function fullFormsByFirstWord(abbreviations) {
+  const forms = new Map();
+  for (const [abbreviation, ...fulls] of abbreviations) {
+    for (const full of fulls) {
+      const words = tokenize(full);
+      if (!forms.has(words[0])) forms.set(words[0], []);
+      forms.get(words[0]).push({ words, abbreviation: stem(abbreviation) });
+    }
+  }
+  for (const candidates of forms.values()) candidates.sort((a, b) => b.words.length - a.words.length);
+  return forms;
+}
+
+function abbreviate(tokens, forms) {
+  const out = [];
+  for (let i = 0; i < tokens.length;) {
+    const form = (forms.get(tokens[i]) ?? []).find(({ words }) => words.every((word, k) => tokens[i + k] === word));
+    out.push(form ? form.abbreviation : tokens[i]);
+    i += form ? form.words.length : 1;
+  }
+  return out;
+}
+
+function fieldCounts(text, forms) {
   const tokens = tokenize(text);
   const counts = new Map();
-  for (const token of tokens) counts.set(token, (counts.get(token) ?? 0) + 1);
+  for (const token of abbreviate(tokens, forms)) counts.set(token, (counts.get(token) ?? 0) + 1);
   return { counts, length: tokens.length };
 }
 
-const documentCache = new WeakMap();
+const caches = new WeakMap();
 
-function documentOf(skill) {
-  if (!documentCache.has(skill)) documentCache.set(skill, FIELDS.map((field) => fieldCounts(field.text(skill))));
-  return documentCache.get(skill);
+function cacheFor(abbreviations) {
+  if (!caches.has(abbreviations)) caches.set(abbreviations, { forms: fullFormsByFirstWord(abbreviations), documents: new WeakMap() });
+  return caches.get(abbreviations);
 }
 
-function search(skills, query, { limit = DEFAULT_LIMIT, projectFiles: filesOrLister = [] } = {}) {
+function documentOf(skill, { forms, documents }) {
+  if (!documents.has(skill)) documents.set(skill, FIELDS.map((field) => fieldCounts(field.text(skill), forms)));
+  return documents.get(skill);
+}
+
+function search(skills, query, { limit = DEFAULT_LIMIT, projectFiles: filesOrLister = [], abbreviations = ABBREVIATIONS } = {}) {
   const anyPaths = skills.some((skill) => pathPatterns(skill.metadata).length > 0);
   const projectFiles = !anyPaths ? [] : typeof filesOrLister === 'function' ? filesOrLister() : filesOrLister;
-  const documents = skills.map(documentOf);
+  const cache = cacheFor(abbreviations);
+  const documents = skills.map((skill) => documentOf(skill, cache));
   const averageLengths = FIELDS.map((_, f) => documents.reduce((sum, d) => sum + d[f].length, 0) / Math.max(documents.length, 1));
   const documentFrequency = new Map();
   for (const fields of documents) {
@@ -53,7 +83,7 @@ function search(skills, query, { limit = DEFAULT_LIMIT, projectFiles: filesOrLis
       documentFrequency.set(token, (documentFrequency.get(token) ?? 0) + 1);
     }
   }
-  const queryTokens = [...new Set(tokenize(query))];
+  const queryTokens = [...new Set(abbreviate(tokenize(query), cache.forms))];
   const scored = skills.map((skill, n) => {
     let score = 0;
     for (const token of queryTokens) {

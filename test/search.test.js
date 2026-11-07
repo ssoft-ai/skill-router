@@ -40,6 +40,43 @@ test('ranks a skill writing a query word in its description above one writing it
   assert.deepStrictEqual(results.map((r) => r.name), ['tagging', 'notes']);
 });
 
+const team = [
+  ...skills,
+  skill('review-rules', 'Apply when opening or reviewing a PR or an MR'),
+  skill('style', 'Apply when writing issue, PR or commit text'),
+  skill('forge', 'Apply when a merge request or a pull request is opened on the forge'),
+  skill('pipelines', 'Apply when the continuous integration pipeline fails', {}, 'Rerun the job; read the API logs.'),
+];
+const namesFor = (query, options) => search(team, query, options).map((r) => r.name);
+
+test('finds a skill writing an abbreviation by its full form, and one writing the full form by the abbreviation', () => {
+  assert.deepStrictEqual(namesFor('pull request').slice(0, 3).sort(), ['forge', 'review-rules', 'style']);
+  assert.deepStrictEqual(namesFor('MR').sort(), ['forge', 'review-rules']);
+});
+
+test('ranks for a query writing a full form as for the same query writing its abbreviation', () => {
+  assert.deepStrictEqual(namesFor('write the pull request description'), namesFor('write the PR description'));
+  assert.deepStrictEqual(namesFor('pull requests to review'), namesFor('PRs to review'));
+  assert.deepStrictEqual(namesFor('fix the continuous integration job'), namesFor('fix the CI job'));
+});
+
+test('ranks for a query writing an abbreviation as for the same query writing its full form', () => {
+  assert.deepStrictEqual(namesFor('open the MR'), namesFor('open the merge request'));
+  assert.deepStrictEqual(namesFor('application programming interface logs'), namesFor('API logs'));
+});
+
+test('ranks a query of words outside the abbreviations as it would with no abbreviations known', () => {
+  for (const query of ['commit message', 'opening the forge', 'job fails', 'writing text']) {
+    assert.deepStrictEqual(namesFor(query), namesFor(query, { abbreviations: [] }), query);
+  }
+  const equalLength = [
+    skill('items', 'Apply when the forge opens item one two three'),
+    skill('requests', 'Apply when the forge opens pull request merge request'),
+  ];
+  const names = (options) => search(equalLength, 'forge', options).map((r) => r.name);
+  assert.deepStrictEqual(names(), names({ abbreviations: [] }));
+});
+
 test('ranks a skill whose paths match a project file above an otherwise equal one', () => {
   const python = skill('python-style', 'Apply when writing code', { paths: ['**/*.py'] });
   const cpp = skill('cpp-style', 'Apply when writing code', { paths: '**/*.h, **/*.cpp' });
