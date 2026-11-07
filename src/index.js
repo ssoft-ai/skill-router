@@ -6,20 +6,36 @@ const { parseSkillFile } = require('./frontmatter');
 const SKILL_FILE = 'SKILL.md';
 const DEFAULT_MAX_ENTRIES = 200000;
 
-function buildIndex(roots, { maxEntries = DEFAULT_MAX_ENTRIES } = {}) {
+function buildIndex(roots, { maxEntries = DEFAULT_MAX_ENTRIES, cache = new Map() } = {}) {
   const visited = new Set();
   const skills = [];
   const indexed = new Set();
   for (const { folder, source } of roots) {
     for (const file of findSkillFiles(folder, { visited, entriesLeft: maxEntries })) {
       if (indexed.has(file)) continue;
-      const skill = readSkill(file, source);
+      const skill = cachedSkill(file, source, cache);
       if (!skill) continue;
       indexed.add(file);
       skills.push(skill);
     }
   }
+  for (const file of cache.keys()) if (!indexed.has(file)) cache.delete(file);
   return { skills };
+}
+
+function cachedSkill(file, source, cache) {
+  let stat;
+  try {
+    stat = fs.statSync(file);
+  } catch {
+    return null;
+  }
+  const entry = cache.get(file);
+  if (entry && entry.source === source && entry.mtimeMs === stat.mtimeMs && entry.size === stat.size) return entry.skill;
+  const skill = readSkill(file, source);
+  if (skill) cache.set(file, { source, mtimeMs: stat.mtimeMs, size: stat.size, skill });
+  else cache.delete(file);
+  return skill;
 }
 
 function findSkillFiles(folder, walk) {

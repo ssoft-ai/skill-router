@@ -34,6 +34,41 @@ test('holds the instructions of a skill, the text below its frontmatter', () => 
   assert.deepStrictEqual(index.skills.map((s) => s.body), ['\nBody of notes.\n']);
 });
 
+function rewriteKeepingTime(file, text, mtime) {
+  fs.writeFileSync(file, text);
+  fs.utimesSync(file, mtime, mtime);
+}
+
+test('reads no SKILL.md again whose time and size are unchanged since the previous index', () => {
+  const file = writeSkill(path.join(dir, 'cached', 'notes'), 'notes', 'Use for aaaa.');
+  const mtime = new Date(2026, 0, 1);
+  fs.utimesSync(file, mtime, mtime);
+  const cache = new Map();
+  buildIndex([{ folder: path.join(dir, 'cached'), source: 'test' }], { cache });
+  rewriteKeepingTime(file, fs.readFileSync(file, 'utf8').replace('aaaa', 'bbbb'), mtime);
+  const index = buildIndex([{ folder: path.join(dir, 'cached'), source: 'test' }], { cache });
+  assert.deepStrictEqual(index.skills.map((s) => s.description), ['Use for aaaa.']);
+});
+
+test('reads a SKILL.md again once its time changed', () => {
+  const file = writeSkill(path.join(dir, 'changed', 'notes'), 'notes', 'Use for aaaa.');
+  const { mtime } = fs.statSync(file);
+  const cache = new Map();
+  buildIndex([{ folder: path.join(dir, 'changed'), source: 'test' }], { cache });
+  rewriteKeepingTime(file, fs.readFileSync(file, 'utf8').replace('aaaa', 'bbbb'), new Date(mtime.getTime() + 2000));
+  const index = buildIndex([{ folder: path.join(dir, 'changed'), source: 'test' }], { cache });
+  assert.deepStrictEqual(index.skills.map((s) => s.description), ['Use for bbbb.']);
+});
+
+test('drops a skill whose SKILL.md was removed since the previous index', () => {
+  const file = writeSkill(path.join(dir, 'removed', 'notes'), 'notes');
+  const cache = new Map();
+  buildIndex([{ folder: path.join(dir, 'removed'), source: 'test' }], { cache });
+  fs.rmSync(file);
+  const index = buildIndex([{ folder: path.join(dir, 'removed'), source: 'test' }], { cache });
+  assert.deepStrictEqual([index.skills, [...cache.keys()]], [[], []]);
+});
+
 test('keeps two skills of the same name, each under its path', () => {
   const one = writeSkill(path.join(dir, 'same', 'a', 'planning'), 'planning');
   const two = writeSkill(path.join(dir, 'same', 'b', 'planning'), 'planning');
