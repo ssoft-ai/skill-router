@@ -15,6 +15,11 @@ test('adds context naming the search and load tools to a prompt', () => {
   assert.match(output.hookSpecificOutput.additionalContext, /search_skills[\s\S]*load_skill/);
 });
 
+test('asks for a term both as its abbreviation and in full', () => {
+  const output = JSON.parse(run(JSON.stringify({ hook_event_name: 'UserPromptSubmit', prompt: 'Write a test' })).stdout);
+  assert.match(output.hookSpecificOutput.additionalContext, /abbreviation and in full/);
+});
+
 test('answers after reading a prompt larger than a pipe buffer', () => {
   const result = run(JSON.stringify({ hook_event_name: 'UserPromptSubmit', prompt: 'x'.repeat(2 * 1024 * 1024) }));
   assert.strictEqual(result.status, 0);
