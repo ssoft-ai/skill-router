@@ -13,6 +13,24 @@ const skills = [
   skill('release', 'Apply when preparing a release, bumping version, or tagging'),
 ];
 
+test('ranks a set of skills one of which changed as a first search over that set ranks it', () => {
+  const query = 'draw the release diagram';
+  search(skills, query);
+  const changed = [skills[0], skill('changelog', 'Apply when a release diagram is drawn'), ...skills.slice(2)];
+  assert.deepStrictEqual(search(changed, query), search(changed, query, { abbreviations: [...ABBREVIATIONS] }));
+});
+
+test('counts the field lengths and word frequencies again only once a skill of the set changed', (t) => {
+  const corpus = require('../src/corpus');
+  const counted = t.mock.method(corpus, 'corpusOf');
+  const abbreviations = [...ABBREVIATIONS];
+  search(skills, 'commit', { abbreviations });
+  search(skills, 'release', { abbreviations });
+  const unchangedCounts = counted.mock.callCount();
+  search([skill('other', 'Apply when notes are written'), ...skills.slice(1)], 'commit', { abbreviations });
+  assert.deepStrictEqual([unchangedCounts, counted.mock.callCount()], [1, 2]);
+});
+
 test('ranks first the skill sharing the most telling words with the request', () => {
   const results = search(skills, 'write the commit message');
   assert.strictEqual(results[0].name, 'commit-rules');

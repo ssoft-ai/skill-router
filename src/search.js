@@ -1,5 +1,6 @@
 'use strict';
 const { ABBREVIATIONS } = require('./abbreviations');
+const corpus = require('./corpus');
 const { stem } = require('./stem');
 
 const DEFAULT_LIMIT = 10;
@@ -31,16 +32,6 @@ function matchWeight(field, { weight, lengthNormalisation, maxLengthFactor = Inf
   if (!field.counts.has(token)) return 0;
   const lengthFactor = 1 - lengthNormalisation + lengthNormalisation * field.length / averageLength;
   return weight / Math.min(maxLengthFactor, Math.max(1, lengthFactor));
-}
-
-function documentFrequency(documents, fields) {
-  const frequency = new Map();
-  for (const document of documents) {
-    for (const token of new Set(fields.flatMap((f) => [...document[f].counts.keys()]))) {
-      frequency.set(token, (frequency.get(token) ?? 0) + 1);
-    }
-  }
-  return frequency;
 }
 
 const ABBREVIATION_MARK = '#';
@@ -123,11 +114,17 @@ function documentOf(skill, { table, documents }) {
   return documents.get(skill);
 }
 
+function cachedCorpus(documents, cache) {
+  const previous = cache.corpus?.documents;
+  const unchanged = previous?.length === documents.length && documents.every((d, n) => d === previous[n]);
+  if (!unchanged) cache.corpus = corpus.corpusOf(documents, FIELDS.length, SCORE_PARTS.map((part) => part.documentFrequencyOver));
+  return cache.corpus;
+}
+
 function search(skills, query, { limit = DEFAULT_LIMIT, abbreviations = ABBREVIATIONS } = {}) {
   const cache = cacheFor(abbreviations);
   const documents = skills.map((skill) => documentOf(skill, cache));
-  const averageLengths = FIELDS.map((_, f) => documents.reduce((sum, d) => sum + d[f].length, 0) / Math.max(documents.length, 1));
-  const frequencies = SCORE_PARTS.map((part) => documentFrequency(documents, part.documentFrequencyOver));
+  const { averageLengths, documentFrequencies } = cachedCorpus(documents, cache);
   const queryTokens = queryTerms(query, cache.table);
   const scored = skills.map((skill, n) => {
     let score = 0;
@@ -135,7 +132,7 @@ function search(skills, query, { limit = DEFAULT_LIMIT, abbreviations = ABBREVIA
       SCORE_PARTS.forEach((part, p) => {
         const frequency = part.fields.reduce((sum, f) => sum + matchWeight(documents[n][f], FIELDS[f], averageLengths[f], token), 0);
         if (frequency === 0) return;
-        const df = frequencies[p].get(token);
+        const df = documentFrequencies[p].get(token);
         const idf = Math.log(1 + (skills.length - df + 0.5) / (df + 0.5));
         score += idf * (frequency * (K1 + 1)) / (frequency + K1);
       });
