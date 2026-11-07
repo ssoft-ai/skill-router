@@ -20,7 +20,8 @@ const SEARCH_DEFINITION = {
       query: {
         type: 'string',
         description: 'The task in a few English words - what is to be done and with what. Write it in English even '
-          + 'when the request is in another language.',
+          + 'when the request is in another language, and write a term that has an abbreviation both as the '
+          + 'abbreviation and in full: "PR pull request".',
       },
       limit: { type: 'integer', minimum: 1, maximum: MAX_LIMIT, description: 'The most skills to return; 10 when omitted.' },
     },

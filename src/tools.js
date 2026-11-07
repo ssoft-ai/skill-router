@@ -6,7 +6,8 @@ const { listProjectFiles } = require('./project');
 const { search } = require('./search');
 
 function createTools({ roots, projectDir }) {
-  const currentIndex = () => buildIndex(roots());
+  const cache = new Map();
+  const currentIndex = () => buildIndex(roots(), { cache });
 
   function searchSkills({ query, limit }) {
     return search(currentIndex().skills, query, { limit, projectFiles: () => listProjectFiles(projectDir) });

@@ -63,3 +63,17 @@ test('load accepts an indexed skill however its path is spelled', () => {
     assert.match(tools.loadSkill({ path: requested }).content, /Use the imperative/, requested);
   }
 });
+
+test('search reads no SKILL.md again that is unchanged since the previous search', () => {
+  const folder = path.join(dir, 'cached-skills');
+  const file = path.join(folder, 'notes', 'SKILL.md');
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, '---\nname: notes\ndescription: Apply when notes aaaa are written\n---\n');
+  const mtime = new Date(2026, 0, 1);
+  fs.utimesSync(file, mtime, mtime);
+  const cached = createTools({ roots: () => [{ folder, source: 'test' }], projectDir: dir });
+  cached.searchSkills({ query: 'notes' });
+  fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('aaaa', 'bbbb'));
+  fs.utimesSync(file, mtime, mtime);
+  assert.deepStrictEqual(cached.searchSkills({ query: 'notes' }).map((r) => r.description), ['Apply when notes aaaa are written']);
+});

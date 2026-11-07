@@ -24,6 +24,11 @@ test('offers a search tool and a load tool', () => {
   assert.deepStrictEqual(tools.map((t) => t.name), ['search_skills', 'load_skill']);
 });
 
+test('asks for a term both as its abbreviation and in full in the query', () => {
+  const { tools } = router.handle({ jsonrpc: '2.0', id: 1, method: 'tools/list' }).result;
+  assert.match(tools[0].inputSchema.properties.query.description, /abbreviation and in full/);
+});
+
 test('finds a nested skill and loads it by the path the search returned', () => {
   const [found] = JSON.parse(call('search_skills', { query: 'commit message' }).content[0].text);
   const loaded = call('load_skill', { path: found.path });
