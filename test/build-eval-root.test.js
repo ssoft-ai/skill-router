@@ -24,13 +24,15 @@ test('holds the router and starts it on the skills folder of the root', () => {
   assert.deepStrictEqual(server.args, ['${CLAUDE_PLUGIN_ROOT}/server.js', '${CLAUDE_PLUGIN_ROOT}/skills']);
 });
 
-test('stores each catalog skill at its path with its name, description and metadata', () => {
+test('stores each catalog skill at its path with its name, description, metadata and instructions', () => {
   const catalog = require('./fixtures/catalog/skills.json');
+  const text = (file) => fs.readFileSync(file, 'utf8').replace(/\r\n/g, '\n').trim();
   for (const skill of catalog) {
-    const { data } = parseSkillFile(fs.readFileSync(path.join(root, 'skills', skill.path), 'utf8'));
+    const { data, body } = parseSkillFile(fs.readFileSync(path.join(root, 'skills', skill.path), 'utf8'));
+    const instructions = text(path.join(__dirname, 'fixtures', 'catalog', 'bodies', `${path.dirname(skill.path)}.md`));
     assert.deepStrictEqual(
-      [data.name, data.description, data.metadata ?? {}],
-      [skill.name, skill.description, skill.metadata ?? {}],
+      [data.name, data.description, data.metadata ?? {}, body.trim()],
+      [skill.name, skill.description, skill.metadata ?? {}, instructions],
       skill.path,
     );
   }
