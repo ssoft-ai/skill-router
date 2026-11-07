@@ -1,11 +1,12 @@
 # End-to-end evaluation
 
-The skills come from `test/fixtures/catalog/skills.json`, a catalog written for these checks: six
-domain skills the Claude Code listing shows, 31 narrower skills nested inside them that it does
-not show, and 23 flat skills it shows beside them. Each of the 31 nested skills has one task,
-written in English, German, Spanish, Russian and Chinese by an agent that saw the skill names and
-none of the descriptions; a case, `<language>-<skill>`, passes a run when the agent loads that
-skill through `load_skill`.
+The skills come from `test/fixtures/catalog/skills.json`, their instructions from
+`test/fixtures/catalog/bodies/`: a catalog written for these checks, with six domain skills the
+Claude Code listing shows, 31 narrower skills nested inside them that it does not show, and 23 flat
+skills it shows beside them. Each of the 31 nested skills has one task, written in English,
+German, Spanish, Russian and Chinese by an agent that saw the skill names and none of the
+descriptions; a case, `<language>-<skill>`, passes a run when the agent loads that skill through
+`load_skill`.
 
 ## Running
 
@@ -18,9 +19,9 @@ node scripts/eval-share.js <result.json>
 ```
 
 The first command prints the root it builds: the router, an `.mcp.json` starting the server on the
-root's own `skills/` folder, the catalog with stub bodies, and these cases. The root stands outside
-the repository, since `claude plugin eval` reads every `prompt.md` under any `evals` folder of the
-tree it is given.
+root's own `skills/` folder, the catalog with its instructions, and these cases. The root stands
+outside the repository, since `claude plugin eval` reads every `prompt.md` under any `evals` folder
+of the tree it is given.
 
 | Flag | Why |
 |---|---|
@@ -45,7 +46,5 @@ result missing a case of this folder.
   a security review of file sharing, which only the domain skill `security` matches.
 - A grader counts one load of the expected skill and no more, so it does not tell a run that picks
   that skill from a run that loads every result.
-- Every skill body is a stub. An agent finding a listed skill empty may go on loading where a real
-  body would have let it start the task.
 - The queries of `test/fixtures/ranking/queries.json` are the ones the agent wrote for these
   tasks, so the ranking test and this evaluation share their requests.
