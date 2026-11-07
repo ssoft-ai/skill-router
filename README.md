@@ -31,8 +31,11 @@ where the language spaces its words; Chinese or Japanese text matches only as a 
 `SKILL.md` as written: unlike Claude Code's Skill tool, it substitutes no `$ARGUMENTS` or
 `${CLAUDE_SKILL_DIR}` and grants no `allowed-tools`.
 
-The skills are read where they stand on every call, at any folder depth, so the index never goes
-stale. Two skills of one name both stay, each under its own path.
+Every call walks the skill folders, at any folder depth, so a skill added or removed is found by the
+next call; a `SKILL.md` is read again only when its modification time or size changed since the
+previous call.
+A `SKILL.md` larger than 1 MiB is left out of the index. Two skills of one name both stay, each
+under its own path.
 
 ## Where it looks
 

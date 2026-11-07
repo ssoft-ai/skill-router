@@ -66,10 +66,17 @@ function fieldCounts(text) {
   return { counts, length: tokens.length };
 }
 
+const documentCache = new WeakMap();
+
+function documentOf(skill) {
+  if (!documentCache.has(skill)) documentCache.set(skill, FIELDS.map((field) => fieldCounts(field.text(skill))));
+  return documentCache.get(skill);
+}
+
 function search(skills, query, { limit = DEFAULT_LIMIT, projectFiles: filesOrLister = [] } = {}) {
   const anyPaths = skills.some((skill) => pathPatterns(skill.metadata).length > 0);
   const projectFiles = !anyPaths ? [] : typeof filesOrLister === 'function' ? filesOrLister() : filesOrLister;
-  const documents = skills.map((skill) => FIELDS.map((field) => fieldCounts(field.text(skill))));
+  const documents = skills.map(documentOf);
   const averageLengths = FIELDS.map((_, f) => documents.reduce((sum, d) => sum + d[f].length, 0) / Math.max(documents.length, 1));
   const frequencies = SCORE_PARTS.map((part) => documentFrequency(documents, part.documentFrequencyOver));
   const queryTokens = [...new Set(tokenize(query))].filter((token) => !FUNCTION_WORDS.has(token));

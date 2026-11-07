@@ -34,6 +34,98 @@ test('holds the instructions of a skill, the text below its frontmatter', () => 
   assert.deepStrictEqual(index.skills.map((s) => s.body), ['\nBody of notes.\n']);
 });
 
+function rewriteKeepingTime(file, text, mtime) {
+  fs.writeFileSync(file, text);
+  fs.utimesSync(file, mtime, mtime);
+}
+
+test('reads no SKILL.md again whose time and size are unchanged since the previous index', () => {
+  const file = writeSkill(path.join(dir, 'cached', 'notes'), 'notes', 'Use for aaaa.');
+  const mtime = new Date(2026, 0, 1);
+  fs.utimesSync(file, mtime, mtime);
+  const cache = new Map();
+  buildIndex([{ folder: path.join(dir, 'cached'), source: 'test' }], { cache });
+  rewriteKeepingTime(file, fs.readFileSync(file, 'utf8').replace('aaaa', 'bbbb'), mtime);
+  const index = buildIndex([{ folder: path.join(dir, 'cached'), source: 'test' }], { cache });
+  assert.deepStrictEqual(index.skills.map((s) => s.description), ['Use for aaaa.']);
+});
+
+test('reads a SKILL.md again once its time changed', () => {
+  const file = writeSkill(path.join(dir, 'changed', 'notes'), 'notes', 'Use for aaaa.');
+  const { mtime } = fs.statSync(file);
+  const cache = new Map();
+  buildIndex([{ folder: path.join(dir, 'changed'), source: 'test' }], { cache });
+  rewriteKeepingTime(file, fs.readFileSync(file, 'utf8').replace('aaaa', 'bbbb'), new Date(mtime.getTime() + 2000));
+  const index = buildIndex([{ folder: path.join(dir, 'changed'), source: 'test' }], { cache });
+  assert.deepStrictEqual(index.skills.map((s) => s.description), ['Use for bbbb.']);
+});
+
+test('reads a SKILL.md again once its size changed at the same time', () => {
+  const file = writeSkill(path.join(dir, 'resized', 'notes'), 'notes', 'Use for aaaa.');
+  const mtime = new Date(2026, 0, 1);
+  fs.utimesSync(file, mtime, mtime);
+  const cache = new Map();
+  buildIndex([{ folder: path.join(dir, 'resized'), source: 'test' }], { cache });
+  rewriteKeepingTime(file, fs.readFileSync(file, 'utf8').replace('aaaa', 'aaaa bbbb'), mtime);
+  const index = buildIndex([{ folder: path.join(dir, 'resized'), source: 'test' }], { cache });
+  assert.deepStrictEqual(index.skills.map((s) => s.description), ['Use for aaaa bbbb.']);
+});
+
+test('gives a cached skill the source of the folder it is found under now', () => {
+  writeSkill(path.join(dir, 'moved-source', 'notes'), 'notes');
+  const cache = new Map();
+  buildIndex([{ folder: path.join(dir, 'moved-source'), source: 'first' }], { cache });
+  const index = buildIndex([{ folder: path.join(dir, 'moved-source'), source: 'second' }], { cache });
+  assert.deepStrictEqual(index.skills.map((s) => s.source), ['second']);
+});
+
+test('leaves out a SKILL.md larger than 1 MiB and keeps one of exactly 1 MiB', () => {
+  const root = path.join(dir, 'size-limit');
+  const write = (name, size) => {
+    const head = `---\nname: ${name}\ndescription: Use for ${name}.\n---\n`;
+    fs.mkdirSync(path.join(root, name), { recursive: true });
+    fs.writeFileSync(path.join(root, name, 'SKILL.md'), head + 'x'.repeat(size - head.length));
+  };
+  write('fits', 1024 * 1024);
+  write('over', 1024 * 1024 + 1);
+  assert.deepStrictEqual(buildIndex([{ folder: root, source: 'test' }]).skills.map((s) => s.name), ['fits']);
+});
+
+test('leaves out a SKILL.md that grew beyond 1 MiB after its size was read', (t) => {
+  const root = path.join(dir, 'grown');
+  const file = writeSkill(path.join(root, 'grown'), 'grown');
+  const statSync = fs.statSync;
+  t.mock.method(fs, 'statSync', (target, ...rest) => {
+    const stat = statSync(target, ...rest);
+    if (path.basename(String(target)) === 'SKILL.md') fs.appendFileSync(file, 'x'.repeat(1024 * 1024));
+    return stat;
+  });
+  assert.deepStrictEqual(buildIndex([{ folder: root, source: 'test' }]).skills, []);
+});
+
+test('reads the whole of a SKILL.md that grew within 1 MiB after its size was read', (t) => {
+  const root = path.join(dir, 'grown-within');
+  const file = writeSkill(path.join(root, 'grown'), 'grown');
+  const added = 'Added text. '.repeat(1000);
+  const statSync = fs.statSync;
+  t.mock.method(fs, 'statSync', (target, ...rest) => {
+    const stat = statSync(target, ...rest);
+    if (path.basename(String(target)) === 'SKILL.md') fs.appendFileSync(file, added);
+    return stat;
+  });
+  const [skill] = buildIndex([{ folder: root, source: 'test' }]).skills;
+  assert.ok(skill.body.endsWith(added));
+});
+
+test('drops a skill whose SKILL.md was removed since the previous index', () => {
+  const file = writeSkill(path.join(dir, 'removed', 'notes'), 'notes');
+  const cache = new Map();
+  buildIndex([{ folder: path.join(dir, 'removed'), source: 'test' }], { cache });
+  fs.rmSync(file);
+  const index = buildIndex([{ folder: path.join(dir, 'removed'), source: 'test' }], { cache });
+  assert.deepStrictEqual([index.skills, [...cache.keys()]], [[], []]);
+});
+
 test('keeps two skills of the same name, each under its path', () => {
   const one = writeSkill(path.join(dir, 'same', 'a', 'planning'), 'planning');
   const two = writeSkill(path.join(dir, 'same', 'b', 'planning'), 'planning');

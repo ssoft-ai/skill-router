@@ -5,21 +5,42 @@ const { parseSkillFile } = require('./frontmatter');
 
 const SKILL_FILE = 'SKILL.md';
 const DEFAULT_MAX_ENTRIES = 200000;
+const MAX_SKILL_BYTES = 1024 * 1024;
 
-function buildIndex(roots, { maxEntries = DEFAULT_MAX_ENTRIES } = {}) {
+function buildIndex(roots, { maxEntries = DEFAULT_MAX_ENTRIES, cache = new Map() } = {}) {
   const visited = new Set();
   const skills = [];
   const indexed = new Set();
   for (const { folder, source } of roots) {
     for (const file of findSkillFiles(folder, { visited, entriesLeft: maxEntries })) {
       if (indexed.has(file)) continue;
-      const skill = readSkill(file, source);
+      const skill = cachedSkill(file, source, cache);
       if (!skill) continue;
       indexed.add(file);
       skills.push(skill);
     }
   }
+  for (const file of cache.keys()) if (!indexed.has(file)) cache.delete(file);
   return { skills };
+}
+
+function cachedSkill(file, source, cache) {
+  let stat;
+  try {
+    stat = fs.statSync(file);
+  } catch {
+    return null;
+  }
+  if (stat.size > MAX_SKILL_BYTES) {
+    cache.delete(file);
+    return null;
+  }
+  const entry = cache.get(file);
+  if (entry && entry.source === source && entry.mtimeMs === stat.mtimeMs && entry.size === stat.size) return entry.skill;
+  const skill = readSkill(file, source, stat.size);
+  if (skill) cache.set(file, { source, mtimeMs: stat.mtimeMs, size: stat.size, skill });
+  else cache.delete(file);
+  return skill;
 }
 
 function findSkillFiles(folder, walk) {
@@ -67,11 +88,33 @@ function realSkillFile(entryPath) {
 
 const text = (value) => (typeof value === 'string' ? value : '');
 
-function readSkill(file, source) {
+function readAtMost(file, limit, expectedSize) {
+  const fd = fs.openSync(file, 'r');
+  try {
+    let buffer = Buffer.allocUnsafe(Math.min(expectedSize ?? limit, limit) + 1);
+    let length = 0;
+    for (;;) {
+      const read = fs.readSync(fd, buffer, length, buffer.length - length, null);
+      if (read === 0) break;
+      length += read;
+      if (length > limit) return null;
+      if (length === buffer.length) buffer = Buffer.concat([buffer, Buffer.allocUnsafe(Math.min(length, limit + 1 - length))]);
+    }
+    return buffer.toString('utf8', 0, length);
+  } finally {
+    fs.closeSync(fd);
+  }
+}
+
+const readSkillText = (file, expectedSize) => readAtMost(file, MAX_SKILL_BYTES, expectedSize);
+
+function readSkill(file, source, size) {
   let data;
   let body;
   try {
-    ({ data, body } = parseSkillFile(fs.readFileSync(file, 'utf8')));
+    const content = readSkillText(file, size);
+    if (content === null) return null;
+    ({ data, body } = parseSkillFile(content));
   } catch {
     return null;
   }
@@ -87,4 +130,4 @@ function readSkill(file, source) {
   };
 }
 
-module.exports = { buildIndex };
+module.exports = { buildIndex, readSkillText };

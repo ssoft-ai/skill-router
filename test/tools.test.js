@@ -53,6 +53,20 @@ test('load refuses every path that is not a skill of the index', () => {
   }
 });
 
+test('load refuses a SKILL.md that grew beyond 1 MiB after the index read its size', (t) => {
+  const root = path.join(dir, 'grown');
+  const file = path.join(root, 'notes', 'SKILL.md');
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, '---\nname: notes\ndescription: Apply when notes are written\n---\nKeep them short.\n');
+  const grown = createTools({ roots: () => [{ folder: root, source: 'test' }] });
+  const [found] = grown.searchSkills({ query: 'notes' });
+  const statSync = fs.statSync;
+  const indexed = statSync(file);
+  fs.appendFileSync(file, 'x'.repeat(1024 * 1024));
+  t.mock.method(fs, 'statSync', (target, ...rest) => (path.basename(String(target)) === 'SKILL.md' ? indexed : statSync(target, ...rest)));
+  assert.throws(() => grown.loadSkill({ path: found.path }), /not a skill of the index/);
+});
+
 test('load accepts an indexed skill however its path is spelled', () => {
   const spellings = [
     `${skillsDir.split(path.sep).join('/')}/commit-rules/SKILL.md`,
@@ -62,4 +76,18 @@ test('load accepts an indexed skill however its path is spelled', () => {
   for (const requested of spellings) {
     assert.match(tools.loadSkill({ path: requested }).content, /Use the imperative/, requested);
   }
+});
+
+test('search reads no SKILL.md again that is unchanged since the previous search', () => {
+  const folder = path.join(dir, 'cached-skills');
+  const file = path.join(folder, 'notes', 'SKILL.md');
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, '---\nname: notes\ndescription: Apply when notes aaaa are written\n---\n');
+  const mtime = new Date(2026, 0, 1);
+  fs.utimesSync(file, mtime, mtime);
+  const cached = createTools({ roots: () => [{ folder, source: 'test' }], projectDir: dir });
+  cached.searchSkills({ query: 'notes' });
+  fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('aaaa', 'bbbb'));
+  fs.utimesSync(file, mtime, mtime);
+  assert.deepStrictEqual(cached.searchSkills({ query: 'notes' }).map((r) => r.description), ['Apply when notes aaaa are written']);
 });
