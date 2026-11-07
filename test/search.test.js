@@ -67,7 +67,7 @@ test('ranks a skill repeating a query word in a field no higher than one writing
   const orders = fields.map((write) => {
     const once = { ...write('rollback', 'once'), path: '/once/SKILL.md' };
     const repeated = { ...write(Array(50).fill('rollback').join(' '), 'repeated'), path: '/repeated/SKILL.md' };
-    return search([once, repeated], 'rollback').map((r) => r.path).join();
+    return search([once, repeated], 'rollback').map((r) => r.skills[0].path).join();
   });
   assert.deepStrictEqual(orders, fields.map(() => '/once/SKILL.md,/repeated/SKILL.md'));
 });
@@ -150,16 +150,30 @@ test('lists the project files only when some skill has paths', () => {
   assert.deepStrictEqual([unlistedRuns, listed], [0, 1]);
 });
 
-test('returns copies of one skill, same name and description, as one result listing the other paths', () => {
-  const copy = { ...skills[0], path: '/other/commit-rules/SKILL.md', folder: '/other/commit-rules' };
-  const results = search([...skills, copy], 'commit message', { limit: 2 });
-  assert.deepStrictEqual(results[0], {
-    name: 'commit-rules',
-    path: skills[0].path,
-    description: skills[0].description,
-    otherPaths: ['/other/commit-rules/SKILL.md'],
+test('returns every skill of one name as one result, in the order found, whichever of them matches', () => {
+  const copies = ['/user', '/plugin', '/project'].map((root) => ({ ...skill('notes', 'Apply when notes are written'), path: `${root}/notes/SKILL.md` }));
+  const found = copies.map((_, matching) => {
+    const indexed = copies.map((copy, n) => (n === matching ? { ...copy, body: 'Run git bisect.' } : copy));
+    return search([...indexed, ...skills], 'bisect');
   });
-  assert.notStrictEqual(results[1]?.name, 'commit-rules');
+  const listed = { name: 'notes', skills: copies.map((copy) => ({ path: copy.path, description: copy.description })) };
+  assert.deepStrictEqual(found, copies.map(() => [listed]));
+});
+
+test('lists the description of each skill of one name, so the agent picks among different ones', () => {
+  const nested = [
+    { ...skill('release-notes', 'Collects the merged pull requests since the last tag'), path: '/skills/release-notes/SKILL.md' },
+    { ...skill('release-notes', 'Writes customer-facing release notes for a product version'), path: '/skills/documents/release-notes/SKILL.md' },
+  ];
+  const expected = [{ name: 'release-notes', skills: nested.map((s) => ({ path: s.path, description: s.description })) }];
+  assert.deepStrictEqual([search(nested, 'merged pull requests'), search(nested, 'customer-facing')], [expected, expected]);
+});
+
+test('ranks a result by the best of the skills it lists', () => {
+  const weak = { ...skill('deploy', 'Apply when a service changes'), path: '/a/deploy/SKILL.md' };
+  const strong = { ...skill('deploy', 'Apply when a service is deployed with a rollback'), path: '/b/deploy/SKILL.md' };
+  const other = skill('rollback-only', 'Apply when a rollback runs');
+  assert.deepStrictEqual(search([weak, other, strong], 'rollback deploy').map((r) => r.name), ['deploy', 'rollback-only']);
 });
 
 test('matches a word of the request to another form of it in a description', () => {
@@ -167,15 +181,18 @@ test('matches a word of the request to another form of it in a description', () 
   assert.deepStrictEqual(results.map((r) => r.name), ['versions']);
 });
 
-test('returns at most ten skills when no number is stated', () => {
+test('returns at most ten results when no number is stated', () => {
   const many = Array.from({ length: 12 }, (_, n) => skill(`s${n}`, `Apply when writing code ${n}`));
   assert.strictEqual(search(many, 'writing code').length, 10);
 });
 
-test('returns at most the stated number of skills, each with its name, path and description', () => {
+test('returns at most the stated number of results, each a name with the path and description of its skills', () => {
   const results = search(skills, 'apply when', { limit: 2 });
   assert.strictEqual(results.length, 2);
-  for (const r of results) assert.deepStrictEqual(Object.keys(r).sort(), ['description', 'name', 'path']);
+  for (const r of results) {
+    assert.deepStrictEqual(Object.keys(r).sort(), ['name', 'skills']);
+    for (const s of r.skills) assert.deepStrictEqual(Object.keys(s).sort(), ['description', 'path']);
+  }
 });
 
 test('reads the longest full form a query writes, whichever order the table lists the forms in', () => {

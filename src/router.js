@@ -12,8 +12,9 @@ const INSTRUCTIONS = 'This server finds the installed skills that fit a task, in
 
 const SEARCH_DEFINITION = {
   name: 'search_skills',
-  description: 'Finds the installed skills that fit a task, among every skill source, best match first, each with '
-    + 'its name, path and description. Call it at the start of a task and whenever the task turns to new work.',
+  description: 'Finds the installed skills that fit a task, among every skill source, best match first: each name '
+    + 'once, with the path and description of every skill of that name, to pick from by description and place. '
+    + 'Call it at the start of a task and whenever the task turns to new work.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -22,7 +23,7 @@ const SEARCH_DEFINITION = {
         description: 'The task in a few English words - what is to be done and with what. Write it in English even '
           + 'when the request is in another language.',
       },
-      limit: { type: 'integer', minimum: 1, maximum: MAX_LIMIT, description: 'The most skills to return; 10 when omitted.' },
+      limit: { type: 'integer', minimum: 1, maximum: MAX_LIMIT, description: 'The most names to return; 10 when omitted.' },
     },
     required: ['query'],
   },

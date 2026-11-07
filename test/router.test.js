@@ -26,7 +26,7 @@ test('offers a search tool and a load tool', () => {
 
 test('finds a nested skill and loads it by the path the search returned', () => {
   const [found] = JSON.parse(call('search_skills', { query: 'commit message' }).content[0].text);
-  const loaded = call('load_skill', { path: found.path });
+  const loaded = call('load_skill', { path: found.skills[0].path });
   assert.strictEqual(found.name, 'commit-rules');
   assert.match(loaded.content[0].text, new RegExp(`^Skill folder: .*commit-rules\\n\\n---\\nname: commit-rules`));
 });

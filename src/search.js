@@ -158,14 +158,19 @@ function search(skills, query, { limit = DEFAULT_LIMIT, projectFiles: filesOrLis
     if (score > 0 && pathsMatchProject(skill, projectFiles)) score *= PATHS_MATCH_BOOST;
     return { skill, score };
   });
-  const results = new Map();
-  for (const { skill } of scored.filter((s) => s.score > 0).sort((a, b) => b.score - a.score)) {
-    const key = JSON.stringify([skill.name, skill.description]);
-    const same = results.get(key);
-    if (same) same.otherPaths = [...(same.otherPaths ?? []), skill.path];
-    else results.set(key, { name: skill.name, path: skill.path, description: skill.description });
+  const byName = new Map();
+  for (const { skill, score } of scored) {
+    const listed = { path: skill.path, description: skill.description };
+    const result = byName.get(skill.name);
+    if (result) {
+      result.skills.push(listed);
+      result.score = Math.max(result.score, score);
+    } else {
+      byName.set(skill.name, { name: skill.name, skills: [listed], score });
+    }
   }
-  return [...results.values()].slice(0, limit);
+  return [...byName.values()].filter((result) => result.score > 0).sort((a, b) => b.score - a.score).slice(0, limit)
+    .map(({ name, skills: listed }) => ({ name, skills: listed }));
 }
 
 module.exports = { search };

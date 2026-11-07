@@ -11,7 +11,7 @@ const bodyOf = (skillPath) => fs.readFileSync(path.join(__dirname, 'fixtures', '
 const skills = require('./fixtures/catalog/skills.json').map((s) => ({ ...s, metadata: {}, body: bodyOf(s.path) }));
 
 function rankOf({ query, expect }, options) {
-  const i = search(skills, query, { limit: 20, ...options }).findIndex((r) => r.path === expect || (r.otherPaths ?? []).includes(expect));
+  const i = search(skills, query, { limit: 20, ...options }).findIndex((r) => r.skills.some((s) => s.path === expect));
   return i < 0 ? Infinity : i + 1;
 }
 

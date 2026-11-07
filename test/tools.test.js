@@ -23,17 +23,16 @@ before(() => {
 });
 after(() => fs.rmSync(dir, { recursive: true, force: true }));
 
-test('search returns the matching skills with name, path and description', () => {
+test('search returns the matching skills, each name with the path and description of its skills', () => {
   const results = tools.searchSkills({ query: 'commit message' });
   assert.deepStrictEqual(results, [{
     name: 'commit-rules',
-    path: fs.realpathSync.native(path.join(skillsDir, 'commit-rules', 'SKILL.md')),
-    description: 'Apply when writing commit messages',
+    skills: [{ path: fs.realpathSync.native(path.join(skillsDir, 'commit-rules', 'SKILL.md')), description: 'Apply when writing commit messages' }],
   }]);
 });
 
 test('load returns the SKILL.md of a skill the search returned and the path of its folder', () => {
-  const [found] = tools.searchSkills({ query: 'commit' });
+  const [found] = tools.searchSkills({ query: 'commit' }).map((r) => r.skills[0]);
   const folder = path.dirname(found.path);
   const expected = { folder, content: fs.readFileSync(found.path, 'utf8') };
   assert.deepStrictEqual(tools.loadSkill({ path: found.path }), expected);
@@ -59,12 +58,36 @@ test('load refuses a SKILL.md that grew beyond 1 MiB after the index read its si
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, '---\nname: notes\ndescription: Apply when notes are written\n---\nKeep them short.\n');
   const grown = createTools({ roots: () => [{ folder: root, source: 'test' }] });
-  const [found] = grown.searchSkills({ query: 'notes' });
+  const [found] = grown.searchSkills({ query: 'notes' }).map((r) => r.skills[0]);
   const statSync = fs.statSync;
   const indexed = statSync(file);
   fs.appendFileSync(file, 'x'.repeat(1024 * 1024));
   t.mock.method(fs, 'statSync', (target, ...rest) => (path.basename(String(target)) === 'SKILL.md' ? indexed : statSync(target, ...rest)));
   assert.throws(() => grown.loadSkill({ path: found.path }), /not a skill of the index/);
+});
+
+test('search returns every skill of one name in a folder in one result, at any depth', () => {
+  const root = path.join(dir, 'same-name');
+  const write = (relative, name, description) => {
+    fs.mkdirSync(path.join(root, relative), { recursive: true });
+    fs.writeFileSync(path.join(root, relative, 'SKILL.md'), `---
+name: ${name}
+description: ${description}
+---
+Body.
+`);
+    return fs.realpathSync.native(path.join(root, relative, 'SKILL.md'));
+  };
+  const collector = write('release-notes', 'release-notes', 'Collects the merged pull requests since the last tag');
+  const writer = write('documents/release-notes', 'release-notes', 'Writes customer-facing release notes for a product version');
+  const current = write('triage', 'triage', 'Triages the issues of a tracker');
+  const archived = write('v1/triage', 'triage', 'Triages the issues of a tracker');
+  const tools = createTools({ roots: () => [{ folder: root, source: 'test' }] });
+  const found = (query) => tools.searchSkills({ query }).map((r) => [r.name, r.skills.map((s) => s.path).sort()]);
+  assert.deepStrictEqual([found('customer-facing release notes'), found('triage issues')], [
+    [['release-notes', [collector, writer].sort()]],
+    [['triage', [current, archived].sort()]],
+  ]);
 });
 
 test('load accepts an indexed skill however its path is spelled', () => {
@@ -89,5 +112,5 @@ test('search reads no SKILL.md again that is unchanged since the previous search
   cached.searchSkills({ query: 'notes' });
   fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('aaaa', 'bbbb'));
   fs.utimesSync(file, mtime, mtime);
-  assert.deepStrictEqual(cached.searchSkills({ query: 'notes' }).map((r) => r.description), ['Apply when notes aaaa are written']);
+  assert.deepStrictEqual(cached.searchSkills({ query: 'notes' }).map((r) => r.skills[0].description), ['Apply when notes aaaa are written']);
 });
