@@ -23,6 +23,10 @@ weighs at least twice a word of the description, and a word of the description m
 the instructions. Longer instructions weigh their words less, a longer description down to half,
 and shorter ones no more. A skill is found by a term only its instructions use, and ranks below a
 skill that differs from it only in writing that term in its description.
+A common abbreviation of software work matches its full form - `PR` and pull request, `CI` and
+continuous integration, `k8s` and Kubernetes, `PRs` and pull requests; `src/abbreviations.js` lists
+them with the plurals each abbreviation takes. A skill is still found by every word it writes; a
+query writing a full form counts as the abbreviation alone.
 
 The agent writes the query, so a request in another language reaches skills described in English
 as an English query. A skill described in another language is found by a query in that language

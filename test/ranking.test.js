@@ -10,8 +10,8 @@ const queries = require('./fixtures/ranking/queries.json');
 const bodyOf = (skillPath) => fs.readFileSync(path.join(__dirname, 'fixtures', 'catalog', 'bodies', `${path.dirname(skillPath)}.md`), 'utf8');
 const skills = require('./fixtures/catalog/skills.json').map((s) => ({ ...s, metadata: {}, body: bodyOf(s.path) }));
 
-function rankOf({ query, expect }) {
-  const i = search(skills, query, { limit: 20 }).findIndex((r) => r.path === expect || (r.otherPaths ?? []).includes(expect));
+function rankOf({ query, expect }, options) {
+  const i = search(skills, query, { limit: 20, ...options }).findIndex((r) => r.path === expect || (r.otherPaths ?? []).includes(expect));
   return i < 0 ? Infinity : i + 1;
 }
 
@@ -42,4 +42,11 @@ const queriesByTermTheDescriptionLacks = require('./fixtures/ranking/term-querie
 test('ranks within the first ten the skill a query targets by a term its description does not hold', () => {
   const missed = queriesByTermTheDescriptionLacks.filter((q) => rankOf(q) > 10).map((q) => q.query);
   assert.deepStrictEqual(missed, []);
+});
+
+test('ranks the target of no query lower for the abbreviations it knows than with none known', () => {
+  const lowered = [...queries, ...queriesByTermTheDescriptionLacks]
+    .filter((q) => rankOf(q) > rankOf(q, { abbreviations: [] }))
+    .map((q) => q.query);
+  assert.deepStrictEqual(lowered, []);
 });

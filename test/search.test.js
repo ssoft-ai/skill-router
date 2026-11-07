@@ -1,6 +1,7 @@
 'use strict';
 const { test } = require('node:test');
 const assert = require('node:assert');
+const { ABBREVIATIONS } = require('../src/abbreviations');
 const { search } = require('../src/search');
 
 const skill = (name, description, metadata = {}, body = '') => ({ name, description, metadata, body, path: `/skills/${name}/SKILL.md`, folder: `/skills/${name}` });
@@ -71,6 +72,68 @@ test('ranks a skill repeating a query word in a field no higher than one writing
   assert.deepStrictEqual(orders, fields.map(() => '/once/SKILL.md,/repeated/SKILL.md'));
 });
 
+const team = [
+  ...skills,
+  skill('review-rules', 'Apply when opening or reviewing a PR or an MR'),
+  skill('style', 'Apply when writing issue, PR or commit text'),
+  skill('forge', 'Apply when a merge request or a pull request is opened on the forge'),
+  skill('pipelines', 'Apply when the continuous integration pipeline fails', {}, 'Rerun the job; read the API logs.'),
+  skill('editor', 'Apply when the integrated development environment is set up'),
+  skill('translations', 'Apply when the l10n strings are updated'),
+];
+const namesFor = (query, options) => search(team, query, options).map((r) => r.name);
+
+test('finds a skill writing an abbreviation by its full form, and one writing the full form by the abbreviation', () => {
+  assert.deepStrictEqual(namesFor('pull request').slice(0, 3).sort(), ['forge', 'review-rules', 'style']);
+  assert.deepStrictEqual(namesFor('MR').sort(), ['forge', 'review-rules']);
+});
+
+test('ranks for a query writing a full form as for the same query writing its abbreviation', () => {
+  assert.deepStrictEqual(namesFor('write the pull request description'), namesFor('write the PR description'));
+  assert.deepStrictEqual(namesFor('pull requests to review'), namesFor('PRs to review'));
+  assert.deepStrictEqual(namesFor('fix the continuous integration job'), namesFor('fix the CI job'));
+});
+
+test('ranks for a query writing an abbreviation as for the same query writing its full form', () => {
+  assert.deepStrictEqual(namesFor('open the MR'), namesFor('open the merge request'));
+  assert.deepStrictEqual(namesFor('application programming interface logs'), namesFor('API logs'));
+});
+
+test('ranks a query of words outside the abbreviations as it would with no abbreviations known', () => {
+  const queries = ['commit message', 'opening the forge', 'job fails', 'writing text', 'integration', 'continuous pipeline',
+    'request', 'user id', 'run it locally'];
+  for (const query of queries) {
+    assert.deepStrictEqual(namesFor(query), namesFor(query, { abbreviations: [] }), query);
+  }
+  const equalLength = [
+    skill('items', 'Apply when the forge opens item one two three'),
+    skill('requests', 'Apply when the forge opens pull request merge request'),
+  ];
+  for (const order of [equalLength, [...equalLength].reverse()]) {
+    const names = (options) => search(order, 'forge', options).map((r) => r.name);
+    assert.deepStrictEqual(names(), names({ abbreviations: [] }));
+  }
+});
+
+const writing = (word) => skill(`writes-${word}`, `Apply when the ${word} is set up`);
+const tableSkills = ABBREVIATIONS.flatMap(({ short, full }) => [writing(short[0]), writing(full[0])]);
+
+test('ranks a word the abbreviations do not list as with no abbreviations known, though it is an abbreviation with an s', () => {
+  const listed = new Set(ABBREVIATIONS.flatMap(({ short }) => short));
+  const words = [...listed].flatMap((form) => [`${form}s`, `${form}es`]).filter((word) => !listed.has(word));
+  const corpus = [...tableSkills, ...words.map(writing)];
+  const names = (query, options) => search(corpus, query, options).map((r) => r.name);
+  assert.deepStrictEqual(words.filter((word) => names(word).join() !== names(word, { abbreviations: [] }).join()), []);
+});
+
+test('ranks a query writing an abbreviation or a full form in the plural as one writing it in the singular', () => {
+  const names = (query) => search(tableSkills, query).map((r) => r.name);
+  const listedPlurals = ABBREVIATIONS.flatMap(({ short }) => short.slice(1).map((plural) => [plural, short[0]]));
+  const fullPlurals = [['pull requests', 'pull request'], ['repositories', 'repository'], ['databases', 'database']];
+  const differing = [...listedPlurals, ...fullPlurals].filter(([plural, single]) => names(plural).join() !== names(single).join());
+  assert.deepStrictEqual([listedPlurals.length > 0, differing], [true, []]);
+});
+
 test('ranks a skill whose paths match a project file above an otherwise equal one', () => {
   const python = skill('python-style', 'Apply when writing code', { paths: ['**/*.py'] });
   const cpp = skill('cpp-style', 'Apply when writing code', { paths: '**/*.h, **/*.cpp' });
@@ -113,6 +176,14 @@ test('returns at most the stated number of skills, each with its name, path and 
   const results = search(skills, 'apply when', { limit: 2 });
   assert.strictEqual(results.length, 2);
   for (const r of results) assert.deepStrictEqual(Object.keys(r).sort(), ['description', 'name', 'path']);
+});
+
+test('reads the longest full form a query writes, whichever order the table lists the forms in', () => {
+  const short = { short: ['pl'], full: ['pull'] };
+  const long = { short: ['pr'], full: ['pull request'] };
+  const corpus = [skill('pulls', 'Apply when a pull is made'), skill('requests', 'Apply when a PR is opened')];
+  const orders = [[short, long], [long, short]].map((abbreviations) => search(corpus, 'pull request', { abbreviations }).map((r) => r.name));
+  assert.deepStrictEqual(orders, [['requests'], ['requests']]);
 });
 
 test('weighs a word of a description by the names and descriptions holding it, however many instructions hold it', () => {
