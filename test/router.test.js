@@ -24,6 +24,49 @@ test('offers a search tool and a load tool', () => {
   assert.deepStrictEqual(tools.map((t) => t.name), ['search_skills', 'load_skill']);
 });
 
+const writeSkill = (folder, name, description, paths, instructions = '') => {
+  fs.mkdirSync(path.join(folder, name), { recursive: true });
+  const metadata = paths ? `metadata:\n  paths: "${paths}"\n` : '';
+  fs.writeFileSync(path.join(folder, name, 'SKILL.md'), `---\nname: ${name}\ndescription: ${description}\n${metadata}---\n${instructions}`);
+};
+
+const searchNames = (folder, project) => {
+  const projectRouter = createRouter({ folders: [folder], env: { CLAUDE_PROJECT_DIR: project }, home: dir, cwd: project });
+  const result = projectRouter.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'search_skills', arguments: { query: 'writing code' } } }).result;
+  return JSON.parse(result.content[0].text).map((found) => found.name);
+};
+
+test('ranks a skill whose metadata paths match a project file where it ranks without them', () => {
+  const project = path.join(dir, 'paths-project');
+  fs.mkdirSync(path.join(project, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(project, 'src', 'main.cpp'), '');
+  const withPaths = path.join(dir, 'paths-skills');
+  const withoutPaths = path.join(dir, 'plain-skills');
+  writeSkill(withPaths, 'python-style', 'Apply when writing code', undefined, 'Keep the code readable.\n');
+  writeSkill(withPaths, 'style-cpp', 'Apply when writing code for a native build', '**/*.cpp');
+  writeSkill(withoutPaths, 'python-style', 'Apply when writing code', undefined, 'Keep the code readable.\n');
+  writeSkill(withoutPaths, 'style-cpp', 'Apply when writing code for a native build');
+  const ranked = ['python-style', 'style-cpp'];
+  assert.deepStrictEqual([searchNames(withPaths, project), searchNames(withoutPaths, project)], [ranked, ranked]);
+});
+
+test('lists no file of the project when it searches', (t) => {
+  const project = path.join(dir, 'listed-project');
+  fs.mkdirSync(path.join(project, 'src'), { recursive: true });
+  fs.writeFileSync(path.join(project, 'src', 'main.cpp'), '');
+  const skills = path.join(dir, 'listed-skills');
+  writeSkill(skills, 'cpp-style', 'Apply when writing code', '**/*.cpp');
+  const read = [];
+  const readdirSync = fs.readdirSync;
+  t.mock.method(fs, 'readdirSync', (folder, ...rest) => {
+    read.push(path.resolve(String(folder)));
+    return readdirSync(folder, ...rest);
+  });
+  searchNames(skills, project);
+  const projectRoot = fs.realpathSync.native(project);
+  assert.deepStrictEqual(read.filter((folder) => [path.resolve(project), projectRoot].some((root) => folder === root || folder.startsWith(`${root}${path.sep}`))), []);
+});
+
 test('finds a nested skill and loads it by the path the search returned', () => {
   const [found] = JSON.parse(call('search_skills', { query: 'commit message' }).content[0].text);
   const loaded = call('load_skill', { path: found.skills[0].path });

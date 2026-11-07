@@ -127,12 +127,10 @@ function readSkill(file, source, size) {
   } catch {
     return null;
   }
-  const metadata = data?.metadata;
   return {
     name: text(data?.name) || path.basename(path.dirname(file)),
     description: text(data?.description) || firstLineOf(body),
     body,
-    metadata: metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata : {},
     path: file,
     folder: path.dirname(file),
     source,

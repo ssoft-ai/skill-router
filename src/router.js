@@ -1,6 +1,6 @@
 'use strict';
 const { createMcpServer } = require('./mcp');
-const { projectDirOf, resolveRoots } = require('./sources');
+const { resolveRoots } = require('./sources');
 const { createTools } = require('./tools');
 const { version } = require('../package.json');
 
@@ -49,10 +49,7 @@ function validSearchArguments({ query, limit }) {
 }
 
 function createRouter({ folders, env, home, cwd }) {
-  const tools = createTools({
-    roots: () => resolveRoots({ folders, env, home, cwd }),
-    projectDir: projectDirOf(env, cwd),
-  });
+  const tools = createTools({ roots: () => resolveRoots({ folders, env, home, cwd }) });
   return createMcpServer({
     name: 'skill-router',
     version,

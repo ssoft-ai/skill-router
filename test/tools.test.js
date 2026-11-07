@@ -19,7 +19,7 @@ before(() => {
   write('skills/commit-rules/SKILL.md', '---\nname: commit-rules\ndescription: Apply when writing commit messages\n---\nUse the imperative.\n');
   write('skills/commit-rules/references/types.md', 'feat, fix\n');
   write('outside/secret/SKILL.md', '---\nname: secret\ndescription: Not indexed\n---\nHidden.\n');
-  tools = createTools({ roots: () => [{ folder: skillsDir, source: 'test' }], projectDir: dir });
+  tools = createTools({ roots: () => [{ folder: skillsDir, source: 'test' }] });
 });
 after(() => fs.rmSync(dir, { recursive: true, force: true }));
 
@@ -128,7 +128,7 @@ test('search reads no SKILL.md again that is unchanged since the previous search
   fs.writeFileSync(file, '---\nname: notes\ndescription: Apply when notes aaaa are written\n---\n');
   const mtime = new Date(2026, 0, 1);
   fs.utimesSync(file, mtime, mtime);
-  const cached = createTools({ roots: () => [{ folder, source: 'test' }], projectDir: dir });
+  const cached = createTools({ roots: () => [{ folder, source: 'test' }] });
   cached.searchSkills({ query: 'notes' });
   fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('aaaa', 'bbbb'));
   fs.utimesSync(file, mtime, mtime);

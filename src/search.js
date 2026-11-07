@@ -1,23 +1,10 @@
 'use strict';
 const { ABBREVIATIONS } = require('./abbreviations');
-const { matchesGlob } = require('./glob');
 const { stem } = require('./stem');
 
 const DEFAULT_LIMIT = 10;
 const K1 = 1.2;
 const B = 0.75;
-const PATHS_MATCH_BOOST = 1.5;
-
-function pathPatterns(metadata) {
-  const paths = metadata?.paths;
-  const list = Array.isArray(paths) ? paths : String(paths ?? '').split(',');
-  return list.map((p) => String(p).trim()).filter(Boolean);
-}
-
-function pathsMatchProject(skill, projectFiles) {
-  const patterns = pathPatterns(skill.metadata);
-  return patterns.some((pattern) => projectFiles.some((file) => matchesGlob(pattern, file)));
-}
 
 const FIELDS = [
   { text: (skill) => skill.name, weight: 2, lengthNormalisation: 0 },
@@ -136,9 +123,7 @@ function documentOf(skill, { table, documents }) {
   return documents.get(skill);
 }
 
-function search(skills, query, { limit = DEFAULT_LIMIT, projectFiles: filesOrLister = [], abbreviations = ABBREVIATIONS } = {}) {
-  const anyPaths = skills.some((skill) => pathPatterns(skill.metadata).length > 0);
-  const projectFiles = !anyPaths ? [] : typeof filesOrLister === 'function' ? filesOrLister() : filesOrLister;
+function search(skills, query, { limit = DEFAULT_LIMIT, abbreviations = ABBREVIATIONS } = {}) {
   const cache = cacheFor(abbreviations);
   const documents = skills.map((skill) => documentOf(skill, cache));
   const averageLengths = FIELDS.map((_, f) => documents.reduce((sum, d) => sum + d[f].length, 0) / Math.max(documents.length, 1));
@@ -155,7 +140,6 @@ function search(skills, query, { limit = DEFAULT_LIMIT, projectFiles: filesOrLis
         score += idf * (frequency * (K1 + 1)) / (frequency + K1);
       });
     }
-    if (score > 0 && pathsMatchProject(skill, projectFiles)) score *= PATHS_MATCH_BOOST;
     return { skill, score };
   });
   const byName = new Map();

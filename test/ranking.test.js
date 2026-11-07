@@ -8,7 +8,7 @@ const { search } = require('../src/search');
 // Queries an agent wrote on Haiku for the Russian requests of evals/router, each naming the catalog skill the request was for.
 const queries = require('./fixtures/ranking/queries.json');
 const bodyOf = (skillPath) => fs.readFileSync(path.join(__dirname, 'fixtures', 'catalog', 'bodies', `${path.dirname(skillPath)}.md`), 'utf8');
-const skills = require('./fixtures/catalog/skills.json').map((s) => ({ ...s, metadata: {}, body: bodyOf(s.path) }));
+const skills = require('./fixtures/catalog/skills.json').map((s) => ({ ...s, body: bodyOf(s.path) }));
 
 function rankOf({ query, expect }, options) {
   const i = search(skills, query, { limit: 20, ...options }).findIndex((r) => r.skills.some((s) => s.path === expect));
