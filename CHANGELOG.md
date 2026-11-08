@@ -19,4 +19,5 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - [search] Matched a common abbreviation, such as PR, to its full form, such as pull request
 - [search] Returned the skills of one name as one result with the path and description of each
 - [plugin] Added the `skill-router` plugin for Claude Code
+- [plugin] Listed every installed skill by name alone, unless the option `skill_names_only` is off
 - [plugin] Reminded the agent on each request to search the skills before any other tool

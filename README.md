@@ -5,7 +5,8 @@ agent reading the [Agent Skills](https://agentskills.io) format. An agent shows 
 and description of each installed skill in every session; with hundreds of skills that listing
 costs tokens on skills the request does not need, and Claude Code leaves out a skill stored inside
 another skill's folder. The router lets the agent search every source for the skills a task needs,
-those the listing leaves out included; the listing itself stays as the agent builds it.
+those the listing leaves out included. In Claude Code the plugin also cuts the listing down to the
+skill names, as the section Installation describes; other agents keep the listing as they build it.
 
 ## Tools
 
@@ -77,6 +78,20 @@ claude plugin install skill-router@ssoft-ai
 
 The plugin loads both tools into every session and adds to each request a reminder to search
 the skills, in English words, before any other tool.
+
+Its option `skill_names_only`, on by default, shows every installed skill in Claude Code's skill
+listing by its name alone, plugin skills included, so the descriptions no longer fill the context
+and the search chooses the skill. While a session runs the plugin sets `skillListingMaxDescChars`
+to 1 in `<project>/.claude/settings.local.json` of the session's project, so a project where the
+router is disabled keeps its listing, unless a settings file of the session sets that key or
+`skillListingBudgetFraction`. The last session of the project to end removes the key, and the file
+and the `.claude` folder where the plugin created them. A prompt given on the command line, as
+`claude -p` gives it, may reach the model before the value is read.
+
+| Limit of `skill_names_only` | What it leaves |
+|---|---|
+| a session killed before its `SessionEnd` event | the key, until the next session of that project ends; once the plugin is uninstalled, the key stays until removed from that file by hand |
+| a session whose router server fails to start | every skill listed by name with nothing to search them, since the hook runs before the server connects |
 
 ### Codex
 

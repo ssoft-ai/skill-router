@@ -5,5 +5,13 @@
   "author": { "name": "Andrei Stepanov" },
   "homepage": "https://github.com/ssoft-ai/skill-router",
   "repository": "https://github.com/ssoft-ai/skill-router",
-  "license": "MIT"
+  "license": "MIT",
+  "userConfig": {
+    "skill_names_only": {
+      "type": "boolean",
+      "title": "List skills by name only",
+      "description": "The skill listing shows every installed skill by its name alone, and the search chooses among them. Off lists the descriptions again.",
+      "default": true
+    }
+  }
 }
