@@ -31,12 +31,33 @@ test('search returns the matching skills, each name with the path and descriptio
   }]);
 });
 
-test('load returns the SKILL.md of a skill the search returned and the path of its folder', () => {
+test('load returns the instructions of a skill the search returned, without its frontmatter, and its folder', () => {
   const [found] = tools.searchSkills({ query: 'commit' }).map((r) => r.skills[0]);
   const folder = path.dirname(found.path);
-  const expected = { folder, content: fs.readFileSync(found.path, 'utf8') };
+  const expected = { folder, instructions: 'Use the imperative.\n' };
   assert.deepStrictEqual(tools.loadSkill({ path: found.path }), expected);
   assert.deepStrictEqual(tools.loadSkill({ path: folder }), expected);
+});
+
+test('load drops the frontmatter of a SKILL.md as the index reads it, a byte order mark and CRLF line ends included', () => {
+  const root = path.join(dir, 'bom');
+  fs.mkdirSync(path.join(root, 'notes'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'notes', 'SKILL.md'), '﻿---\r\nname: notes\r\ndescription: Apply when notes are written\r\n---\r\n\r\nKeep them short.\r\n');
+  const bom = createTools({ roots: () => [{ folder: root, source: 'test' }] });
+  assert.strictEqual(bom.loadSkill({ path: path.join(root, 'notes') }).instructions, 'Keep them short.\n');
+});
+
+test('shows a path inside the home folder from ~, and loads a skill by that path', () => {
+  const homed = createTools({ roots: () => [{ folder: skillsDir, source: 'test' }], home: dir });
+  const shown = homed.shownPath(path.join(skillsDir, 'commit-rules'));
+  assert.deepStrictEqual([shown, homed.loadSkill({ path: shown }).instructions],
+    [`~${path.sep}skills${path.sep}commit-rules`, 'Use the imperative.\n']);
+});
+
+test('shows a path outside the home folder as it is, a sibling whose name starts as the home name included', () => {
+  const target = path.join(skillsDir, 'commit-rules');
+  const shown = [path.join(dir, 'home'), path.join(dir, 'sk')].map((home) => createTools({ roots: () => [], home }).shownPath(target));
+  assert.deepStrictEqual(shown, [target, target]);
 });
 
 test('load refuses every path that is not a skill of the index', () => {
@@ -97,7 +118,7 @@ test('load accepts an indexed skill however its path is spelled', () => {
     path.join(skillsDir, 'commit-rules'),
   ];
   for (const requested of spellings) {
-    assert.match(tools.loadSkill({ path: requested }).content, /Use the imperative/, requested);
+    assert.match(tools.loadSkill({ path: requested }).instructions, /Use the imperative/, requested);
   }
 });
 
@@ -115,7 +136,7 @@ test('load returns the text a SKILL.md link leads to with the folder of the link
   }
   const linked = createTools({ roots: () => [{ folder: root, source: 'test' }] });
   const folder = path.join(fs.realpathSync.native(root), 'foo');
-  const expected = { folder, content: fs.readFileSync(shared, 'utf8') };
+  const expected = { folder, instructions: 'Shared body.\n' };
   const loaded = [path.join(root, 'foo', 'SKILL.md'), path.join(root, 'foo')].map((requested) => linked.loadSkill({ path: requested }));
   assert.deepStrictEqual(loaded, [expected, expected]);
   assert.throws(() => linked.loadSkill({ path: shared }), /not a skill of the index/);

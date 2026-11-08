@@ -12,8 +12,8 @@ skill names, as the section Installation describes; other agents keep the listin
 
 | Tool | Takes | Returns |
 |---|---|---|
-| `search_skills` | `query` - the task in a few English words; `limit` - 1 to 20, 10 by default | the best matching skills, best first, each name once with the path and description of every skill of that name |
-| `load_skill` | `path` - a path `search_skills` returned | the skill's `SKILL.md` and the path of its folder |
+| `search_skills` | `query` - the task in a few English words; `limit` - 1 to 20, 10 by default | the best matching skills, best first, as text: each name once, then the folder of every skill of that name and its description, one description for copies sharing it |
+| `load_skill` | `path` - a folder `search_skills` returned, or the path of its `SKILL.md` | the skill's instructions and the path of its folder |
 
 The search ranks a skill by the words its name, its description and its instructions share with
 the query, each counted once in each of them however often it is repeated; the articles,
@@ -32,9 +32,10 @@ query writing a full form counts as the abbreviation alone.
 The agent writes the query, so a request in another language reaches skills described in English
 as an English query. A skill described in another language is found by a query in that language
 where the language spaces its words; Chinese or Japanese text matches only as a whole unbroken run.
-`load_skill` answers only a path that resolves to a skill of the index. It returns the text of
-`SKILL.md` as written: unlike Claude Code's Skill tool, it substitutes no `$ARGUMENTS` or
-`${CLAUDE_SKILL_DIR}` and grants no `allowed-tools`.
+A path inside the home folder is shown from `~`, and `load_skill` takes it so. `load_skill` answers
+only a path that resolves to a skill of the index. It returns `SKILL.md` without its frontmatter,
+whose name and description the search already gave: unlike Claude Code's Skill tool, it substitutes
+no `$ARGUMENTS` or `${CLAUDE_SKILL_DIR}` and grants no `allowed-tools`.
 
 Every call walks the skill folders, at any folder depth, so a skill added or removed is found by the
 next call. The walk enters no folder whose name starts with a dot, such as `.git` or `.trash`, and
@@ -59,7 +60,7 @@ The project is `$CLAUDE_PROJECT_DIR`, or the folder the server starts in.
 
 Several skills can share a name: a copy installed for two agents, an older version a plugin keeps
 in a folder such as `skills/v1`, a different skill nested elsewhere. No file tells which of them is
-current, so a search returns them as one result, the name with the path and description of each,
+current, so a search returns them as one result, the name with the folder and description of each,
 and the agent picks by description and place. The result ranks by the best of them. It lists the
 user's skills first, then the project's, then the plugins' and last those Codex ships. A skill in
 `<project>/.claude/skills` is left out where `$CLAUDE_CONFIG_DIR/skills` holds one of the same name,
