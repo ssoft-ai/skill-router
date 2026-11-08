@@ -40,7 +40,10 @@ next call. The walk enters no folder whose name starts with a dot, such as `.git
 no `node_modules` folder. A `SKILL.md` is read again only when its modification time or size
 changed since the previous call.
 A `SKILL.md` larger than 1 MiB is left out of the index. A `SKILL.md` that links to a file, of any
-name, is a skill of the folder holding the link, so two links to one file are two skills.
+name, is a skill of the folder holding the link, so two links to one file are two skills. As
+Claude Code lists them, a skill whose frontmatter gives no name takes the name of its folder, and
+one giving no description, or a `SKILL.md` with no frontmatter, is described by the first line of
+its instructions.
 
 ## Where it looks
 

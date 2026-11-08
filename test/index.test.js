@@ -179,6 +179,16 @@ test('takes the folder name and an empty description when the frontmatter gives 
   assert.deepStrictEqual([skill.name, skill.description], ['listed', '']);
 });
 
+test('describes a skill without a description by the first line of its instructions, heading marks dropped, as Claude Code lists it', () => {
+  const root = path.join(dir, 'no-description');
+  fs.mkdirSync(path.join(root, 'nodesc'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'nodesc', 'SKILL.md'), '---\nname: nodesc\n---\n\nRuns the probe.\nSecond line.\n');
+  fs.mkdirSync(path.join(root, 'bare'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'bare', 'SKILL.md'), '# Bare probe\n\nRuns the bare probe.\n');
+  const described = buildIndex([{ folder: root, source: 'test' }]).skills.map((s) => [s.name, s.description]).sort();
+  assert.deepStrictEqual(described, [['bare', 'Bare probe'], ['nodesc', 'Runs the probe.']]);
+});
+
 test('indexes the other skills when one SKILL.md entry is a broken link', () => {
   const root = path.join(dir, 'broken');
   const good = writeSkill(path.join(root, 'good'), 'good');

@@ -115,6 +115,8 @@ function readAtMost(file, limit, expectedSize) {
 
 const readSkillText = (file, expectedSize) => readAtMost(file, MAX_SKILL_BYTES, expectedSize);
 
+const firstLineOf = (body) => (body.split('\n').find((line) => line.trim()) ?? '').replace(/^\s*#+/, '').trim();
+
 function readSkill(file, source, size) {
   let data;
   let body;
@@ -128,7 +130,7 @@ function readSkill(file, source, size) {
   const metadata = data?.metadata;
   return {
     name: text(data?.name) || path.basename(path.dirname(file)),
-    description: text(data?.description),
+    description: text(data?.description) || firstLineOf(body),
     body,
     metadata: metadata && typeof metadata === 'object' && !Array.isArray(metadata) ? metadata : {},
     path: file,
