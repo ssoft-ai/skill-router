@@ -101,6 +101,26 @@ test('load accepts an indexed skill however its path is spelled', () => {
   }
 });
 
+test('load returns the text a SKILL.md link leads to with the folder of the link, by the link and by that folder', (t) => {
+  const root = path.join(dir, 'file-link');
+  const shared = path.join(dir, 'store', 'shared.md');
+  fs.mkdirSync(path.dirname(shared), { recursive: true });
+  fs.writeFileSync(shared, '---\nname: shared\ndescription: Apply when shared notes are written\n---\nShared body.\n');
+  fs.mkdirSync(path.join(root, 'foo'), { recursive: true });
+  try {
+    fs.symlinkSync(shared, path.join(root, 'foo', 'SKILL.md'), 'file');
+  } catch (error) {
+    if (error.code === 'EPERM') return t.skip('this account may not create file links');
+    throw error;
+  }
+  const linked = createTools({ roots: () => [{ folder: root, source: 'test' }] });
+  const folder = path.join(fs.realpathSync.native(root), 'foo');
+  const expected = { folder, content: fs.readFileSync(shared, 'utf8') };
+  const loaded = [path.join(root, 'foo', 'SKILL.md'), path.join(root, 'foo')].map((requested) => linked.loadSkill({ path: requested }));
+  assert.deepStrictEqual(loaded, [expected, expected]);
+  assert.throws(() => linked.loadSkill({ path: shared }), /not a skill of the index/);
+});
+
 test('search reads no SKILL.md again that is unchanged since the previous search', () => {
   const folder = path.join(dir, 'cached-skills');
   const file = path.join(folder, 'notes', 'SKILL.md');

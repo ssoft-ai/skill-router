@@ -39,7 +39,8 @@ Every call walks the skill folders, at any folder depth, so a skill added or rem
 next call. The walk enters no folder whose name starts with a dot, such as `.git` or `.trash`, and
 no `node_modules` folder. A `SKILL.md` is read again only when its modification time or size
 changed since the previous call.
-A `SKILL.md` larger than 1 MiB is left out of the index.
+A `SKILL.md` larger than 1 MiB is left out of the index. A `SKILL.md` that links to a file, of any
+name, is a skill of the folder holding the link, so two links to one file are two skills.
 
 ## Where it looks
 

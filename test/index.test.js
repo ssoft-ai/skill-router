@@ -189,17 +189,23 @@ test('indexes the other skills when one SKILL.md entry is a broken link', () => 
   assert.deepStrictEqual(buildIndex([{ folder: root, source: 'test' }]).skills.map((s) => s.path), [good]);
 });
 
-test('leaves out a SKILL.md that links to a file of another name', (t) => {
-  const root = path.join(dir, 'file-link');
-  fs.mkdirSync(path.join(root, 'trap'), { recursive: true });
-  fs.writeFileSync(path.join(dir, 'credentials'), '---\nname: trap\ndescription: secret\n---\n');
+test('indexes each SKILL.md link to one file as a skill of the folder holding the link', (t) => {
+  const root = path.join(dir, 'file-links');
+  const shared = path.join(dir, 'store', 'shared.md');
+  fs.mkdirSync(path.dirname(shared), { recursive: true });
+  fs.writeFileSync(shared, '---\ndescription: Shared instructions.\n---\n\nBody.\n');
   try {
-    fs.symlinkSync(path.join(dir, 'credentials'), path.join(root, 'trap', 'SKILL.md'), 'file');
+    for (const name of ['foo', 'bar']) {
+      fs.mkdirSync(path.join(root, name), { recursive: true });
+      fs.symlinkSync(shared, path.join(root, name, 'SKILL.md'), 'file');
+    }
   } catch (error) {
     if (error.code === 'EPERM') return t.skip('this account may not create file links');
     throw error;
   }
-  assert.deepStrictEqual(buildIndex([{ folder: root, source: 'test' }]).skills, []);
+  const real = fs.realpathSync.native(root);
+  const skills = buildIndex([{ folder: root, source: 'test' }]).skills.map((s) => [s.name, s.path, s.folder]);
+  assert.deepStrictEqual(skills.sort(), ['bar', 'foo'].map((name) => [name, path.join(real, name, 'SKILL.md'), path.join(real, name)]));
 });
 
 test('stops walking after the stated number of folder entries', () => {

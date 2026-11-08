@@ -68,9 +68,8 @@ function findSkillFiles(folder, walk) {
     if (isServiceFolderName(entry.name) || walk.skipped.some((skipped) => samePath(skipped, entryPath))) continue;
     if (entry.isDirectory() || (entry.isSymbolicLink() && isFolder(entryPath))) {
       found.push(...findSkillFiles(entryPath, walk));
-    } else if (entry.name === SKILL_FILE) {
-      const file = realSkillFile(entryPath);
-      if (file) found.push(file);
+    } else if (entry.name === SKILL_FILE && isFile(entryPath)) {
+      found.push(entryPath);
     }
   }
   return found;
@@ -86,12 +85,11 @@ function isFolder(link) {
   }
 }
 
-function realSkillFile(entryPath) {
+function isFile(entryPath) {
   try {
-    const file = fs.realpathSync.native(entryPath);
-    return path.basename(file) === SKILL_FILE && fs.statSync(file).isFile() ? file : null;
+    return fs.statSync(entryPath).isFile();
   } catch {
-    return null;
+    return false;
   }
 }
 
