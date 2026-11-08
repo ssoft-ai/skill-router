@@ -96,3 +96,8 @@ test('folds and keeps block scalars by their indicators', () => {
     plain: 'seven eight',
   });
 });
+
+test('reads a value opening a flow list it never closes as plain text, as Claude Code and Codex do', () => {
+  const parsed = parseSkillFile(['---', 'description: [Fills forms, unclosed', '---', ''].join('\n'));
+  assert.deepStrictEqual(parsed.data, { description: '[Fills forms, unclosed' });
+});
