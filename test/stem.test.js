@@ -19,3 +19,10 @@ test('leaves a word of two letters, a word beyond the English letters and a symb
   const words = ['is', 'prüfungen', 'versión', 'выпуски', '测试', 'c++'];
   assert.deepStrictEqual(words.map(stem), words);
 });
+
+test('stems a word of 40 letters and leaves a longer one as it is, a run of y included', () => {
+  const run = 'y'.repeat(20000);
+  const longest = `${'a'.repeat(37)}ing`;
+  const tooLong = `${'a'.repeat(38)}ing`;
+  assert.deepStrictEqual([stem(longest), stem(tooLong), stem(run)], ['a'.repeat(37), tooLong, run]);
+});

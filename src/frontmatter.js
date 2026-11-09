@@ -39,7 +39,7 @@ function parseMapping(lines, i, indent) {
 }
 
 function parseValue(lines, i, indent, inline) {
-  if (inline.startsWith('[')) return { value: flowList(inline), next: i };
+  if (inline.startsWith('[') && CLOSED_FLOW_LIST.test(inline)) return { value: flowList(inline), next: i };
   const blockIndicator = /^([|>])([+-]?)\s*(#.*)?$/.exec(inline);
   if (blockIndicator) {
     const block = takeIndented(lines, i, indent);
@@ -60,6 +60,7 @@ function parseValue(lines, i, indent, inline) {
 }
 
 const CLOSED_QUOTE = /^(?:'(?:[^']|'')*'|"(?:[^"\\]|\\.)*")/;
+const CLOSED_FLOW_LIST = /\]\s*(?:#.*)?$/;
 
 function takeIndented(lines, i, indent) {
   let last = i;

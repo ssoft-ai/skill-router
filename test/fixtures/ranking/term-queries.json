@@ -1,0 +1,22 @@
+[
+  { "query": "check this PR", "expect": "code-review/SKILL.md" },
+  { "query": "which PRs went into v2.0", "expect": "release-notes/SKILL.md" },
+  { "query": "Renovate opened twelve PRs", "expect": "dependency-updates/SKILL.md" },
+  { "query": "deploy to k8s", "expect": "operations/kubernetes-deployments/SKILL.md" },
+  { "query": "the db is slow on one report", "expect": "data-engineering/sql-query-tuning/SKILL.md" },
+  { "query": "write a regex for invoice numbers", "expect": "regex-help/SKILL.md" },
+  { "query": "set up a CI for the new project", "expect": "ci-pipelines/SKILL.md" },
+  { "query": "set up continuous delivery", "expect": "ci-pipelines/SKILL.md" },
+  { "query": "describe the application programming interface for clients", "expect": "documents/api-reference-docs/SKILL.md" },
+  { "query": "run pg_repack", "expect": "data-engineering/sql-query-tuning/postgres-vacuum/SKILL.md" },
+  { "query": "use ftfy on the names", "expect": "data-engineering/csv-cleaning/SKILL.md" },
+  { "query": "git bisect between two tags", "expect": "debugging/SKILL.md" },
+  { "query": "Velero schedule", "expect": "operations/backup-restore/SKILL.md" },
+  { "query": "upload mapping.txt to the crash console", "expect": "mobile/android-builds/SKILL.md" },
+  { "query": "burn rate over one hour", "expect": "operations/alert-tuning/SKILL.md" },
+  { "query": "attach py-spy to the worker", "expect": "performance-profiling/SKILL.md" },
+  { "query": "lsof +L1", "expect": "linux-admin/SKILL.md" },
+  { "query": "MSW handlers for fetch", "expect": "web-development/react-components/react-testing/SKILL.md" },
+  { "query": "RFC 9457 problem details", "expect": "api-design/SKILL.md" },
+  { "query": "configure git-cliff", "expect": "release-notes/SKILL.md" }
+]

@@ -36,9 +36,8 @@ function metadataLines(metadata = {}) {
   return `metadata:\n${lines.join('\n')}\n`;
 }
 
-function skillFile({ name, description, metadata }) {
-  return `---\nname: ${name}\ndescription: ${JSON.stringify(description)}\n${metadataLines(metadata)}---\n\n`
-    + `Stub of the skill ${name}, built for the router evaluation.\n`;
+function skillFile({ name, description, metadata }, instructions) {
+  return `---\nname: ${name}\ndescription: ${JSON.stringify(description)}\n${metadataLines(metadata)}---\n\n${instructions}`;
 }
 
 function build(repoDir, outDir) {
@@ -64,11 +63,13 @@ function build(repoDir, outDir) {
       },
     },
   }, null, 2)}\n`);
-  const skills = JSON.parse(fs.readFileSync(path.join(repoDir, 'test', 'fixtures', 'catalog', 'skills.json'), 'utf8'));
+  const catalog = path.join(repoDir, 'test', 'fixtures', 'catalog');
+  const skills = JSON.parse(fs.readFileSync(path.join(catalog, 'skills.json'), 'utf8'));
   for (const skill of skills) {
     const file = path.join(root, 'skills', ...skill.path.split('/'));
+    const instructions = fs.readFileSync(path.join(catalog, 'bodies', `${path.posix.dirname(skill.path)}.md`), 'utf8');
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, skillFile(skill));
+    fs.writeFileSync(file, skillFile(skill, instructions));
   }
   fs.cpSync(path.join(repoDir, 'evals'), path.join(root, 'evals'), { recursive: true });
   return root;
