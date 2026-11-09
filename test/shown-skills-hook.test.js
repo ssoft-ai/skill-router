@@ -83,6 +83,15 @@ test('shows a loaded skill without a name by its folder, as the search lists it'
   assert.deepStrictEqual(shown(run('load_skill', { path: folder })), { systemMessage: 'Skill loaded: changelog' });
 });
 
+test('shows a loaded skill by its folder when the SKILL.md under it cannot be read', () => {
+  const plain = path.join(dir, 'plain-file');
+  fs.writeFileSync(plain, 'not a folder\n');
+  const response = [{ type: 'text', text: `Skill folder: ${plain}\n\nFollow the rules.\n` }];
+  const input = { hook_event_name: 'PostToolUse', tool_name: `${TOOL}load_skill`, tool_input: { path: plain }, tool_response: response };
+  const result = spawnSync(process.execPath, [hookPath], { input: JSON.stringify(input), encoding: 'utf8' });
+  assert.deepStrictEqual(shown(result), { systemMessage: 'Skill loaded: plain-file' });
+});
+
 test('shows no skill name for a search the router refused', () => {
   const result = run('search_skills', { query: '' });
   assert.deepStrictEqual([result.status, result.stdout], [0, '']);

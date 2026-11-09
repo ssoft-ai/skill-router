@@ -4,7 +4,6 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { readSkill } = require('../src/index');
-const { oneLine } = require('../src/one-line');
 const { loadedFolder, searchedNames } = require('../src/texts');
 
 const chunks = [];
@@ -29,12 +28,18 @@ function messageFor({ tool_name: tool, tool_response: response }) {
   if (tool.endsWith('__load_skill')) {
     const shown = loadedFolder(text);
     if (shown === null) return null;
-    const folder = shown.replace(/^~(?=[\\/])/, os.homedir());
-    const file = path.join(folder, 'SKILL.md');
-    const size = fs.statSync(file, { throwIfNoEntry: false })?.size;
-    return `Skill loaded: ${oneLine(readSkill(file, undefined, size)?.name ?? path.basename(folder))}`;
+    return `Skill loaded: ${nameOf(shown.replace(/^~(?=[\\/])/, os.homedir()))}`;
   }
   return null;
+}
+
+function nameOf(folder) {
+  const file = path.join(folder, 'SKILL.md');
+  try {
+    return readSkill(file, undefined, fs.statSync(file).size)?.name ?? path.basename(folder);
+  } catch {
+    return path.basename(folder);
+  }
 }
 
 function textOf(response) {
