@@ -13,7 +13,23 @@ skill names, as the section Installation describes; other agents keep the listin
 | Tool | Takes | Returns |
 |---|---|---|
 | `search_skills` | `query` - the task in a few English words; `limit` - 1 to 20, 10 by default | the best matching skills, best first, as text: each name once, then the folder of every skill of that name and its description, one description for copies sharing it |
-| `load_skill` | `path` - a folder `search_skills` returned, or the path of its `SKILL.md` | the skill's instructions and the path of its folder |
+| `load_skill` | `path` - a folder `search_skills` or `load_skill` returned, or the path of its `SKILL.md` | the skill's instructions, the path of its folder and, where skills are stored inside that folder, the nearest of them in the form of a search result |
+
+The server's instructions, which the agent reads once as a session starts, end with the tree of the
+skills stored inside other skills' folders, at any depth: each line a folder inside the folder above
+it, with the skill's own name in brackets where it differs from its folder, and an example of the
+path `load_skill` takes, built from the first skill of the tree. The agent picks a skill from the
+tree and loads it without loading the skill above it. Where `SKILL_ROUTER_INSTRUCTIONS_LIMIT` sets a
+number of characters for the instructions, a tree too long for it loses its deepest levels first,
+each line cut naming how many skills its next level holds, which loading that skill lists; with no
+setting the tree is whole. The Claude Code plugin sets it to the characters Claude Code passes the
+model of a server's instructions: 4096, or as many as `CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH` sets.
+A skill stands in the tree once, at the path the walk first reaches it by. A root folder that is
+itself a skill names that skill on its line. A folder holding a `SKILL.md` the index leaves out, or
+a skill hidden by a skill of the same name, is part of the path to the skills below it. Where no
+skill is stored inside another, the instructions hold no tree. A skill added while the session runs
+is missing from the tree until the next session, and the search finds it at once. Should the tree
+fail to build, the instructions go without it.
 
 The search ranks a skill by the words its name, its description and its instructions share with
 the query, each counted once in each of them however often it is repeated; the articles,
@@ -39,8 +55,12 @@ no `$ARGUMENTS` or `${CLAUDE_SKILL_DIR}` and grants no `allowed-tools`.
 
 Every call walks the skill folders, at any folder depth, so a skill added or removed is found by the
 next call. The walk enters no folder whose name starts with a dot, such as `.git` or `.trash`, and
-no `node_modules` folder. A `SKILL.md` is read again only when its modification time or size
-changed since the previous call.
+no `node_modules` folder. It takes the names of a folder in order and reads each folder once, so a
+link cycle ends. It reads the folders of every root first and follows the links to folders after
+them: a skill a root's folders hold keeps its own folder, and one only a link reaches takes the path
+of that link, standing in the tree under the skill whose folder holds the link, by the name of the
+link. A `SKILL.md` is read again only when its modification time or size changed since the previous
+call.
 A `SKILL.md` larger than 1 MiB is left out of the index. A `SKILL.md` that links to a file, of any
 name, is a skill of the folder holding the link, so two links to one file are two skills. As
 Claude Code lists them, a skill whose frontmatter gives no name takes the name of its folder, and

@@ -34,9 +34,130 @@ test('search returns the matching skills, each name with the path and descriptio
 test('load returns the instructions of a skill the search returned, without its frontmatter, and its folder', () => {
   const [found] = tools.searchSkills({ query: 'commit' }).map((r) => r.skills[0]);
   const folder = path.dirname(found.path);
-  const expected = { folder, instructions: 'Use the imperative.\n' };
+  const expected = { folder, instructions: 'Use the imperative.\n', inside: [] };
   assert.deepStrictEqual(tools.loadSkill({ path: found.path }), expected);
   assert.deepStrictEqual(tools.loadSkill({ path: folder }), expected);
+});
+
+const writeNamed = (base, relative, name) => {
+  fs.mkdirSync(path.join(base, relative), { recursive: true });
+  fs.writeFileSync(path.join(base, relative, 'SKILL.md'), `---\nname: ${name}\ndescription: Apply when ${name} work is done\n---\n`);
+};
+const insideOf = (tools, folder) => tools.loadSkill({ path: folder }).inside.map((r) => r.name);
+
+test('lists as narrower only skills of the same skill folder root, in the order of their names', () => {
+  const root = path.join(dir, 'roots');
+  const write = (relative, name) => writeNamed(root, relative, name);
+  write('dev-skill', 'dev-skill');
+  write(path.join('dev-skill', 'zeta'), 'zeta');
+  write(path.join('dev-skill', 'alpha'), 'alpha');
+  write(path.join('dev-skill', '.agents', 'skills', 'other'), 'other');
+  const tools = createTools({ roots: () => [{ folder: root, source: 'user' }, { folder: path.join(root, 'dev-skill', '.agents', 'skills'), source: 'project' }] });
+  const inside = tools.loadSkill({ path: path.join(root, 'dev-skill') }).inside.map((r) => r.name);
+  assert.deepStrictEqual(inside, ['alpha', 'zeta']);
+});
+
+test('lists no skill under the skills whose folders link to it where its own folder lies inside the root, whatever the order of names', () => {
+  for (const store of ['astore', 'zstore']) {
+    const root = path.join(dir, `link-order-${store}`);
+    const write = (relative, name) => writeNamed(root, relative, name);
+    write('mobile', 'mobile');
+    write('web', 'web');
+    write(path.join(store, 'kite'), 'kite');
+    fs.symlinkSync(path.join(root, store, 'kite'), path.join(root, 'mobile', 'kite'), 'junction');
+    fs.symlinkSync(path.join(root, store, 'kite'), path.join(root, 'web', 'kite'), 'junction');
+    const tools = createTools({ roots: () => [{ folder: root, source: 'user' }] });
+    const inside = ['mobile', 'web'].map((parent) => tools.loadSkill({ path: path.join(root, parent) }).inside.map((r) => r.name));
+    assert.deepStrictEqual(inside, [[], []], store);
+  }
+});
+
+test('lists no skill a link back to its own folder or an ancestor reaches, so no skill lists itself or the skill above it', () => {
+  const root = path.join(dir, 'link-cycles');
+  writeNamed(root, 'a', 'a');
+  writeNamed(root, path.join('a', 'b'), 'b');
+  writeNamed(root, 's', 's');
+  fs.symlinkSync(path.join(root, 'a'), path.join(root, 'a', 'b', 'up'), 'junction');
+  fs.symlinkSync(path.join(root, 's'), path.join(root, 's', 'self'), 'junction');
+  const tools = createTools({ roots: () => [{ folder: root, source: 'user' }] });
+  assert.deepStrictEqual(['a', path.join('a', 'b'), 's'].map((f) => insideOf(tools, path.join(root, f))), [['b'], [], []]);
+});
+
+test('lists no skill whose folder holds the skill\'s own, though a chain of links leads back into it', () => {
+  const root = path.join(dir, 'link-chain-back');
+  writeNamed(root, 'a', 'a');
+  writeNamed(root, path.join('a', 'b'), 'b');
+  fs.mkdirSync(path.join(root, 'hub'), { recursive: true });
+  fs.symlinkSync(path.join(root, 'hub'), path.join(root, 'a', 'b', 'via'), 'junction');
+  fs.symlinkSync(path.join(root, 'a'), path.join(root, 'hub', 'back'), 'junction');
+  const tools = createTools({ roots: () => [{ folder: root, source: 'user' }] });
+  assert.deepStrictEqual(['a', path.join('a', 'b')].map((f) => insideOf(tools, path.join(root, f))), [['b'], []]);
+});
+
+test('lists a skill below a SKILL.md the index leaves out under the skill above, by the path through that folder', () => {
+  const root = path.join(dir, 'left-out');
+  writeNamed(root, 'm', 'm');
+  writeNamed(root, path.join('m', 'big', 'leaf'), 'leaf');
+  fs.writeFileSync(path.join(root, 'm', 'big', 'SKILL.md'), `---\nname: big\n---\n${'x'.repeat(1024 * 1024)}\n`);
+  const tools = createTools({ roots: () => [{ folder: root, source: 'user' }] });
+  const [{ nodes: [top] }] = tools.skillTree();
+  assert.deepStrictEqual([insideOf(tools, path.join(root, 'm')), top.children.map((c) => c.rel)], [['leaf'], [path.join('big', 'leaf')]]);
+});
+
+test('lists neither of two skills linked into each other\'s folders under the other, both standing at their own folders', () => {
+  const root = path.join(dir, 'link-mutual');
+  writeNamed(root, 'a', 'a');
+  writeNamed(root, 'b', 'b');
+  fs.symlinkSync(path.join(root, 'b'), path.join(root, 'a', 'to-b'), 'junction');
+  fs.symlinkSync(path.join(root, 'a'), path.join(root, 'b', 'to-a'), 'junction');
+  const tools = createTools({ roots: () => [{ folder: root, source: 'user' }] });
+  assert.deepStrictEqual(['a', 'b'].map((f) => insideOf(tools, path.join(root, f))), [[], []]);
+});
+
+test('lists as narrower only a skill the load takes, though a link puts it in a root that does not hide its name', () => {
+  const user = path.join(dir, 'loadable-user');
+  const project = path.join(dir, 'loadable-project');
+  const codex = path.join(dir, 'loadable-codex');
+  writeNamed(user, 'dup', 'dup');
+  writeNamed(project, path.join('store', 'dup'), 'dup');
+  writeNamed(codex, 'parent', 'parent');
+  fs.symlinkSync(path.join(project, 'store', 'dup'), path.join(codex, 'parent', 'dup'), 'junction');
+  const roots = [{ folder: user, source: 'user' }, { folder: project, source: 'project', hiddenBy: 'user' }, { folder: codex, source: 'codex' }];
+  const tools = createTools({ roots: () => roots });
+  assert.deepStrictEqual(insideOf(tools, path.join(codex, 'parent')), []);
+});
+
+test('lists the nearest level where two roots cover the same folders', () => {
+  const root = path.join(dir, 'overlapping-roots');
+  writeNamed(root, 'top', 'top');
+  writeNamed(root, path.join('top', 'group', 'mid'), 'mid');
+  writeNamed(root, path.join('top', 'group', 'mid', 'leaf'), 'leaf');
+  const tools = createTools({ roots: () => [{ folder: root, source: 'user' }, { folder: path.join(root, 'top', 'group'), source: 'plugin' }] });
+  assert.deepStrictEqual([insideOf(tools, path.join(root, 'top')), insideOf(tools, path.join(root, 'top', 'group', 'mid'))], [['mid'], ['leaf']]);
+});
+
+test('hides a skill linked into a root that hides its name, as a copy stored there would be', () => {
+  const user = path.join(dir, 'alias-user');
+  const project = path.join(dir, 'alias-project');
+  writeNamed(user, 'ops', 'ops');
+  writeNamed(project, 'team', 'team');
+  writeNamed(project, path.join('team', 'roster'), 'roster');
+  fs.symlinkSync(path.join(user, 'ops'), path.join(project, 'team', 'ops'), 'junction');
+  const tools = createTools({ roots: () => [{ folder: user, source: 'user' }, { folder: project, source: 'project', hiddenBy: 'user' }] });
+  assert.deepStrictEqual(insideOf(tools, path.join(project, 'team')), ['roster']);
+});
+
+test('lists a skill below a hidden skill under the skill above it, by the path through the hidden skill\'s folder', () => {
+  const user = path.join(dir, 'hidden-user');
+  const project = path.join(dir, 'hidden-project');
+  const write = writeNamed;
+  write(user, 'ops', 'ops');
+  write(project, 'team', 'team');
+  write(project, path.join('team', 'ops'), 'ops');
+  write(project, path.join('team', 'ops', 'runbook'), 'runbook');
+  write(project, path.join('team', 'roster'), 'roster');
+  const tools = createTools({ roots: () => [{ folder: user, source: 'user' }, { folder: project, source: 'project', hiddenBy: 'user' }] });
+  assert.deepStrictEqual(tools.loadSkill({ path: path.join(project, 'team') }).inside.map((r) => r.name), ['roster', 'runbook']);
 });
 
 test('load drops the frontmatter of a SKILL.md as the index reads it, a byte order mark and CRLF line ends included', () => {
@@ -136,7 +257,7 @@ test('load returns the text a SKILL.md link leads to with the folder of the link
   }
   const linked = createTools({ roots: () => [{ folder: root, source: 'test' }] });
   const folder = path.join(fs.realpathSync.native(root), 'foo');
-  const expected = { folder, instructions: 'Shared body.\n' };
+  const expected = { folder, instructions: 'Shared body.\n', inside: [] };
   const loaded = [path.join(root, 'foo', 'SKILL.md'), path.join(root, 'foo')].map((requested) => linked.loadSkill({ path: requested }));
   assert.deepStrictEqual(loaded, [expected, expected]);
   assert.throws(() => linked.loadSkill({ path: shared }), /not a skill of the index/);

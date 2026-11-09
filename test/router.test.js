@@ -24,9 +24,159 @@ test('offers a search tool and a load tool', () => {
   assert.deepStrictEqual(tools.map((t) => t.name), ['search_skills', 'load_skill']);
 });
 
-test('asks for the language and the kind of file the task works on in the query', () => {
-  const { tools } = router.handle({ jsonrpc: '2.0', id: 1, method: 'tools/list' }).result;
-  assert.match(tools[0].inputSchema.properties.query.description, /language and the kind of file/);
+const instructionsOf = (folders, env = {}) => createRouter({ folders, env, home: path.join(dir, 'elsewhere'), cwd: dir })
+  .handle({ jsonrpc: '2.0', id: 1, method: 'initialize', params: {} }).result.instructions;
+const treeOf = (instructions) => instructions.split('\n\n').at(-1).split('\n');
+
+test('lists in its instructions every skill stored inside another skill\'s folder, at any depth, and names none under a search result', () => {
+  const folder = path.join(dir, 'found-tree');
+  writeSkill(folder, 'mobile', 'Apply when phone apps are built');
+  writeSkill(path.join(folder, 'mobile'), 'kite-switches', 'Apply when Kite flips');
+  writeSkill(path.join(folder, 'mobile', 'kite-switches'), 'kite-audit', 'Apply when Kite history is read');
+  writeSkill(path.join(folder, 'mobile', 'builds'), 'ios-signing', 'Apply when profiles fail');
+  writeSkill(folder, 'flat', 'Apply when phone numbers are formatted');
+  const real = fs.realpathSync.native(folder);
+  const tree = createRouter({ folders: [folder], env: {}, home: path.join(dir, 'elsewhere'), cwd: dir });
+  const searched = tree.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'search_skills', arguments: { query: 'phone apps built' } } }).result.content[0].text;
+  assert.deepStrictEqual([treeOf(instructionsOf([folder])), searched.includes('narrower')],
+    [[real, '  mobile', `    ${path.join('builds', 'ios-signing')}`, '    kite-switches', '      kite-audit'], false]);
+});
+
+test('lists a skill linked into another skill\'s folder by the name of the link, in the tree and in a load of the skill above, and loads it by that path', () => {
+  const folder = path.join(dir, 'linked-tree');
+  writeSkill(path.join(folder, 'skills'), 'mobile', 'Apply when phone apps are built');
+  writeSkill(path.join(folder, 'store'), 'kite-store', 'Apply when Kite flips');
+  fs.symlinkSync(path.join(folder, 'store', 'kite-store'), path.join(folder, 'skills', 'mobile', 'kite'), 'junction');
+  const real = fs.realpathSync.native(path.join(folder, 'skills'));
+  const tree = createRouter({ folders: [path.join(folder, 'skills')], env: {}, home: path.join(dir, 'elsewhere'), cwd: dir });
+  const load = (target) => tree.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'load_skill', arguments: { path: target } } }).result;
+  const listed = load(path.join(real, 'mobile')).content[0].text.split('\n').map((line) => line.trim());
+  assert.deepStrictEqual([treeOf(instructionsOf([path.join(folder, 'skills')])), listed.includes(path.join(real, 'mobile', 'kite')), load(path.join(real, 'mobile', 'kite')).isError ?? false],
+    [[real, '  mobile', '    kite (skill kite-store)'], true, false]);
+});
+
+test('lists apart two copies of a skill whose folders hold different skills', () => {
+  const folder = path.join(dir, 'copies-tree');
+  writeSkill(path.join(folder, 'a'), 'mobile', 'Apply when phone apps are built');
+  writeSkill(path.join(folder, 'a', 'mobile'), 'kite-switches', 'Apply when Kite flips');
+  writeSkill(path.join(folder, 'b'), 'mobile', 'Apply when phone apps are built');
+  writeSkill(path.join(folder, 'b', 'mobile'), 'ios-signing', 'Apply when profiles fail');
+  const real = fs.realpathSync.native(folder);
+  assert.deepStrictEqual(treeOf(instructionsOf([folder])),
+    [real, `  ${path.join('a', 'mobile')}`, '    kite-switches', `  ${path.join('b', 'mobile')}`, '    ios-signing']);
+});
+
+test('gives in its instructions the path of the first skill of its tree as an example, which load_skill loads', () => {
+  const folder = path.join(dir, 'example-tree');
+  writeSkill(folder, 'documents', 'Apply when papers are written');
+  writeSkill(path.join(folder, 'documents'), 'lumen-brief', 'Apply when Lumen is due', undefined, 'Fill the brief.\n');
+  const real = fs.realpathSync.native(folder);
+  const example = path.join(real, 'documents', 'lumen-brief');
+  const instructions = instructionsOf([folder]);
+  const tree = createRouter({ folders: [folder], env: {}, home: path.join(dir, 'elsewhere'), cwd: dir });
+  const loaded = tree.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'load_skill', arguments: { path: example } } }).result.content[0].text;
+  assert.deepStrictEqual([instructions.includes(example), loaded.includes('Fill the brief.')], [true, true]);
+});
+
+test('keeps its instructions free of a tree where no skill is stored inside another', () => {
+  const folder = path.join(dir, 'flat-tree');
+  writeSkill(folder, 'notes', 'Apply when notes are written');
+  assert.deepStrictEqual(instructionsOf([folder]).split('\n\n').length, 1);
+});
+
+test('shortens the tree from its deepest level to stay within the characters its setting names, naming how many skills each cut line holds, and keeps it whole with no setting', () => {
+  const folder = path.join(dir, 'large-tree');
+  writeSkill(folder, 'field', 'Apply when the field is worked');
+  for (let n = 0; n < 36; n++) {
+    const area = `area-with-a-long-folder-name-${String(n).padStart(2, '0')}`;
+    writeSkill(path.join(folder, 'field'), area, 'Apply when the area is worked');
+    for (let k = 1; k <= 3; k++) writeSkill(path.join(folder, 'field', area), `leaf-skill-with-a-long-folder-name-${k}`, 'Apply when a leaf is worked');
+  }
+  const instructions = instructionsOf([folder], { SKILL_ROUTER_INSTRUCTIONS_LIMIT: '4096' });
+  const lines = treeOf(instructions);
+  const whole = treeOf(instructionsOf([folder]));
+  assert.deepStrictEqual([instructions.length <= 4096, lines[1], lines[2], whole.includes('      leaf-skill-with-a-long-folder-name-3')],
+    [true, '  field', '    area-with-a-long-folder-name-00 (3 more skills inside; load it to list them)', true]);
+});
+
+test('builds the tree once for each skill however many links lead to it, within a second for twenty layers of shared links', () => {
+  const folder = path.join(dir, 'shared-links');
+  for (let layer = 0; layer < 20; layer++) for (const side of ['a', 'b']) writeSkill(folder, `l${layer}${side}`, 'Apply when a layer is worked');
+  for (let layer = 0; layer < 19; layer++) {
+    for (const side of ['a', 'b']) {
+      for (const next of ['a', 'b']) fs.symlinkSync(path.join(folder, `l${layer + 1}${next}`), path.join(folder, `l${layer}${side}`, `to-${next}`), 'junction');
+    }
+  }
+  const started = process.hrtime.bigint();
+  const instructions = instructionsOf([folder]);
+  const elapsed = Number(process.hrtime.bigint() - started) / 1e6;
+  assert.deepStrictEqual([elapsed < 1000, instructions.length <= 4096], [true, true], `${elapsed} ms`);
+});
+
+const { instructionsText } = require('../src/texts');
+const node = (name, children = []) => ({ skill: { name }, rel: name, children });
+
+test('names on a cut line as many skills as a load of that skill lists, its nearest level', () => {
+  const tops = Array.from({ length: 40 }, (_, n) => node(`child-skill-with-a-long-folder-name-${String(n).padStart(2, '0')}`,
+    [node('grandchild-skill-with-a-long-name', [node('great-grandchild-skill-one-long'), node('great-grandchild-skill-two-long')])]));
+  const text = instructionsText('Base.', [{ root: '/r', nodes: [node('top', tops)] }], (p) => p, 4096);
+  const cut = text.split('\n').filter((line) => line.includes('more skill'));
+  assert.deepStrictEqual([cut.length > 0, cut.every((line) => line.includes('(1 more skill inside;'))], [true, true]);
+});
+
+test('ends a cut tree with a skill line, never with a root that lists nothing', () => {
+  const ends = [];
+  for (let count = 60; count < 140; count++) {
+    const first = Array.from({ length: count }, (_, n) => node(`first-root-skill-${String(n).padStart(3, '0')}`, [node('inner')]));
+    const text = instructionsText('Base.', [{ root: '/first', nodes: first }, { root: '/second', nodes: [node('second-root-skill', [node('inner')])] }], (p) => p, 4096);
+    const lines = text.split('\n');
+    ends.push(lines.at(-2));
+  }
+  assert.deepStrictEqual(ends.filter((line) => line === '/first' || line === '/second'), []);
+});
+
+test('lists a skill at its own folder inside the root, though links in other skills\' folders lead to it', () => {
+  const folder = path.join(dir, 'twice-linked');
+  writeSkill(folder, 'a', 'Apply when a is worked');
+  writeSkill(folder, 'b', 'Apply when b is worked');
+  writeSkill(path.join(folder, 'store'), 'shared', 'Apply when shared is worked');
+  writeSkill(path.join(folder, 'store', 'shared'), 'inner', 'Apply when inner is worked');
+  fs.symlinkSync(path.join(folder, 'store', 'shared'), path.join(folder, 'a', 'x'), 'junction');
+  fs.symlinkSync(path.join(folder, 'store', 'shared'), path.join(folder, 'b', 'y'), 'junction');
+  const real = fs.realpathSync.native(folder);
+  assert.deepStrictEqual(treeOf(instructionsOf([folder])),
+    [real, `  ${path.join('store', 'shared')}`, '    inner']);
+});
+
+test('names on the line of a root folder that is itself a skill that skill, the skills inside it below', () => {
+  const folder = path.join(dir, 'root-skill');
+  fs.mkdirSync(folder, { recursive: true });
+  fs.writeFileSync(path.join(folder, 'SKILL.md'), '---\nname: rootskill\ndescription: Apply when the root is worked\n---\n');
+  writeSkill(folder, 'inner', 'Apply when inner is worked');
+  const real = fs.realpathSync.native(folder);
+  assert.deepStrictEqual(treeOf(instructionsOf([folder])), [`${real} (skill rootskill)`, '  inner']);
+});
+
+test('cuts a root folder that is itself a skill at the same level as the skills a plain root holds', () => {
+  const domains = Array.from({ length: 60 }, (_, n) => node(`domain-${String(n).padStart(2, '0')}`,
+    [node('first-nested-skill'), node('second-nested-skill'), node('third-nested-skill')]));
+  const rootSkill = { skill: { name: 'rootskill' }, rel: '', children: [node('x', [node('y')])] };
+  const lines = instructionsText('Base.', [{ root: '/a', nodes: [rootSkill] }, { root: '/b', nodes: domains }], (p) => p, 4096).split('\n');
+  assert.deepStrictEqual([lines.includes('/a (skill rootskill) (1 more skill inside; load it to list them)'), lines.includes('  x')], [true, false]);
+});
+
+test('keeps the line of a root folder that is itself a skill where the cut tree ends after it', () => {
+  const ends = [];
+  for (let count = 1; count < 60; count++) {
+    const first = Array.from({ length: count }, (_, n) => node(`first-root-skill-${String(n).padStart(3, '0')}`, [node('inner')]));
+    const second = { skill: { name: 'rootskill' }, rel: '', children: [node('inner')] };
+    const third = Array.from({ length: 40 }, (_, n) => node(`third-root-skill-with-a-very-long-folder-name-${String(n).padStart(3, '0')}`,
+      [node('inner-skill-with-a-long-folder-name')]));
+    const roots = [{ root: '/first', nodes: first }, { root: '/second', nodes: [second] }, { root: '/third', nodes: third }];
+    const lines = instructionsText('Base.', roots, (p) => p, 4096).split('\n');
+    if (lines.at(-1).startsWith('search_skills finds')) ends.push(lines.at(-2));
+  }
+  assert.deepStrictEqual([ends.some((line) => line.startsWith('/second (skill rootskill)')), ends.some((line) => ['/first', '/second', '/third'].includes(line))], [true, false]);
 });
 
 const writeSkill = (folder, name, description, paths, instructions = '') => {
@@ -111,6 +261,21 @@ test('shows a description written over several lines on one indented line', () =
   const lines = result.content[0].text.split('\n');
   assert.deepStrictEqual([lines.filter((line) => !line.startsWith('  ')).sort(), lines.filter((line) => line.trim() === 'Apply when notes are written').length],
     [['folded-notes', 'literal-notes'], 2]);
+});
+
+test('lists after the instructions of a loaded skill the skills one level inside its folder, each with its folder and description', () => {
+  const folder = path.join(dir, 'tree');
+  writeSkill(folder, 'security', 'Apply when systems are protected', undefined, 'Protect the system.\n');
+  writeSkill(path.join(folder, 'security', 'checks'), 'secret-scanning', 'Apply when keys leak');
+  writeSkill(path.join(folder, 'security'), 'threat-modelling', 'Apply when attacks are mapped');
+  writeSkill(path.join(folder, 'security', 'threat-modelling'), 'stride', 'Apply when STRIDE is walked');
+  const tree = createRouter({ folders: [folder], env: {}, home: path.join(dir, 'elsewhere'), cwd: dir });
+  const real = fs.realpathSync.native(folder);
+  const loaded = tree.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'load_skill', arguments: { path: path.join(folder, 'security') } } }).result;
+  const [, inside] = loaded.content[0].text.split('Protect the system.\n');
+  const listed = inside.split('\n').filter((line) => line && !line.startsWith(' ') && !line.endsWith(':'));
+  assert.deepStrictEqual([listed.sort(), inside.includes(path.join(real, 'security', 'checks', 'secret-scanning')), inside.includes('Apply when attacks are mapped')],
+    [['secret-scanning', 'threat-modelling'], true, true]);
 });
 
 test('names a skill whose frontmatter name is blank by its folder, as a skill without a name', () => {

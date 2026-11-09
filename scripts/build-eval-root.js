@@ -54,13 +54,10 @@ function build(repoDir, outDir) {
   fs.mkdirSync(root, { recursive: true });
   fs.writeFileSync(path.join(root, MARKER), `${JSON.stringify({ builtBy: BUILT_BY }, null, 2)}\n`);
   for (const file of ROUTER_FILES) fs.cpSync(path.join(repoDir, file), path.join(root, file), { recursive: true });
+  const plugin = JSON.parse(fs.readFileSync(path.join(repoDir, '.mcp.json'), 'utf8')).mcpServers['skill-router'];
   fs.writeFileSync(path.join(root, '.mcp.json'), `${JSON.stringify({
     mcpServers: {
-      'skill-router': {
-        command: 'node',
-        args: ['${CLAUDE_PLUGIN_ROOT}/server.js', '${CLAUDE_PLUGIN_ROOT}/skills'],
-        alwaysLoad: true,
-      },
+      'skill-router': { ...plugin, args: ['${CLAUDE_PLUGIN_ROOT}/server.js', '${CLAUDE_PLUGIN_ROOT}/skills'] },
     },
   }, null, 2)}\n`);
   const catalog = path.join(repoDir, 'test', 'fixtures', 'catalog');

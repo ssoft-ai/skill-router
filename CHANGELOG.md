@@ -23,3 +23,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - [plugin] Listed every installed skill by name alone, unless the option `skill_names_only` is off
 - [plugin] Reminded the agent on each request to search the skills before any other tool
 - [plugin] Showed in the console the skills each search found and each load loaded
+- [router] Listed in the server instructions the skills stored inside other skills' folders
+- [router] Listed after a loaded skill's instructions the skills stored inside its folder
+- [router] Cut the tree of nested skills to the characters `SKILL_ROUTER_INSTRUCTIONS_LIMIT` names

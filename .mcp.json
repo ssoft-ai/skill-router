@@ -3,6 +3,7 @@
     "skill-router": {
       "command": "node",
       "args": ["${CLAUDE_PLUGIN_ROOT}/server.js"],
+      "env": { "SKILL_ROUTER_INSTRUCTIONS_LIMIT": "${CLAUDE_CODE_MAX_MCP_DESCRIPTION_LENGTH:-4096}" },
       "alwaysLoad": true
     }
   }

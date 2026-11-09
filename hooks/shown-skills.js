@@ -3,7 +3,8 @@
 const os = require('node:os');
 const path = require('node:path');
 const { readSkill } = require('../src/index');
-const { loadedFolder, searchedNames } = require('../src/router');
+const { oneLine } = require('../src/one-line');
+const { loadedFolder, searchedNames } = require('../src/texts');
 
 const chunks = [];
 process.stdin.on('data', (chunk) => chunks.push(chunk));
@@ -28,7 +29,7 @@ function messageFor({ tool_name: tool, tool_response: response }) {
     const shown = loadedFolder(text);
     if (shown === null) return null;
     const folder = shown.replace(/^~(?=[\\/])/, os.homedir());
-    return `Skill loaded: ${readSkill(path.join(folder, 'SKILL.md'))?.name ?? path.basename(folder)}`;
+    return `Skill loaded: ${oneLine(readSkill(path.join(folder, 'SKILL.md'))?.name ?? path.basename(folder))}`;
   }
   return null;
 }

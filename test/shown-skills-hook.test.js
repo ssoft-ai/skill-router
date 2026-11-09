@@ -43,6 +43,32 @@ test('shows the user the names a search returned and adds nothing to the context
   assert.deepStrictEqual([result.status, shown(result)], [0, { systemMessage: 'Skills found: commit-rules, pr-rules, changelog' }]);
 });
 
+test('shows the names a search returned and none of the skills stored inside them', () => {
+  const skills = path.join(dir, 'nested-skills');
+  for (const [folder, name, description] of [['mobile', 'mobile', 'Apply when phone apps are built'], [path.join('mobile', 'kite-switches'), 'kite-switches', 'Apply when Kite flips']]) {
+    fs.mkdirSync(path.join(skills, folder), { recursive: true });
+    fs.writeFileSync(path.join(skills, folder, 'SKILL.md'), `---\nname: ${name}\ndescription: ${description}\n---\n`);
+  }
+  const nested = createRouter({ folders: [skills], env: {}, home: dir, cwd: dir });
+  const args = { query: 'phone apps', limit: 1 };
+  const response = nested.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'search_skills', arguments: args } }).result.content;
+  const input = { hook_event_name: 'PostToolUse', tool_name: `${TOOL}search_skills`, tool_input: args, tool_response: response };
+  const result = spawnSync(process.execPath, [hookPath], { input: JSON.stringify(input), encoding: 'utf8' });
+  assert.deepStrictEqual(shown(result), { systemMessage: 'Skills found: mobile' });
+});
+
+test('shows on one line the name of a loaded skill written over several lines', () => {
+  const skills = path.join(dir, 'block-names');
+  fs.mkdirSync(path.join(skills, 'notes'), { recursive: true });
+  fs.writeFileSync(path.join(skills, 'notes', 'SKILL.md'), '---\nname: |\n  release\n  notes\ndescription: Apply when notes are written\n---\nBody.\n');
+  const blocks = createRouter({ folders: [skills], env: {}, home: path.join(dir, 'elsewhere'), cwd: dir });
+  const args = { path: path.join(skills, 'notes') };
+  const response = blocks.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'load_skill', arguments: args } }).result.content;
+  const input = { hook_event_name: 'PostToolUse', tool_name: `${TOOL}load_skill`, tool_input: args, tool_response: response };
+  const result = spawnSync(process.execPath, [hookPath], { input: JSON.stringify(input), encoding: 'utf8' });
+  assert.deepStrictEqual(shown(result), { systemMessage: 'Skill loaded: release notes' });
+});
+
 test('shows the user that a search found no skill', () => {
   assert.deepStrictEqual(shown(run('search_skills', { query: 'zzzz qqqq' })), { systemMessage: 'No skill found' });
 });
