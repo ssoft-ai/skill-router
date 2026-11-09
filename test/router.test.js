@@ -113,6 +113,26 @@ test('shows a description written over several lines on one indented line', () =
     [['folded-notes', 'literal-notes'], 2]);
 });
 
+test('names a skill whose frontmatter name is blank by its folder, as a skill without a name', () => {
+  const folder = path.join(dir, 'blank-names');
+  fs.mkdirSync(path.join(folder, 'notes'), { recursive: true });
+  fs.writeFileSync(path.join(folder, 'notes', 'SKILL.md'), '---\nname: "   "\ndescription: Apply when notes are written\n---\n');
+  const blank = createRouter({ folders: [folder], env: {}, home: path.join(dir, 'elsewhere'), cwd: dir });
+  const text = blank.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'search_skills', arguments: { query: 'notes' } } }).result.content[0].text;
+  assert.strictEqual(text.split('\n')[0], 'notes');
+});
+
+test('returns as one result the skills whose names differ only in their line breaks and spaces', () => {
+  const folder = path.join(dir, 'spaced-names');
+  for (const [sub, name] of [['a', 'release notes'], ['b', '|\n  release\n  notes']]) {
+    fs.mkdirSync(path.join(folder, sub), { recursive: true });
+    fs.writeFileSync(path.join(folder, sub, 'SKILL.md'), `---\nname: ${name}\ndescription: Apply when release notes are written\n---\n`);
+  }
+  const spaced = createRouter({ folders: [folder], env: {}, home: path.join(dir, 'elsewhere'), cwd: dir });
+  const text = spaced.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'search_skills', arguments: { query: 'release notes' } } }).result.content[0].text;
+  assert.deepStrictEqual(text.split('\n').filter((line) => !line.startsWith(' ')), ['release notes']);
+});
+
 test('answers a search no skill fits in words', () => {
   assert.strictEqual(call('search_skills', { query: 'zzzz qqqq' }).content[0].text, 'No skill fits.');
 });

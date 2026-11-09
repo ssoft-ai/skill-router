@@ -122,7 +122,7 @@ function readSkill(file, source, size) {
     return null;
   }
   return {
-    name: text(data?.name) || path.basename(path.dirname(file)),
+    name: text(data?.name).replace(/\s+/g, ' ').trim() || path.basename(path.dirname(file)),
     description: text(data?.description) || firstLineOf(body),
     body,
     path: file,
