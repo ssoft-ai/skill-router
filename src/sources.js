@@ -123,4 +123,4 @@ function isProject(installedFor, projectDir) {
   return samePath(canonical(installedFor), canonical(projectDir));
 }
 
-module.exports = { defaultRoots, projectDirOf, resolveRoots };
+module.exports = { defaultRoots, resolveRoots };

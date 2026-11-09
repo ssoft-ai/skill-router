@@ -15,7 +15,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - [sources] Searched the skills Codex ships in `$CODEX_HOME/skills/.system`
 - [sources] Skipped the folders named with a leading dot and the `node_modules` folders
 - [sources] Left out a project skill of Claude Code that a user skill of the same name hides
-- [search] Ranked higher a skill whose `metadata.paths` matches a project file
 - [search] Searched the instructions of each skill besides its name and description
 - [search] Matched a common abbreviation, such as PR, to its full form, such as pull request
 - [search] Returned the skills of one name as one result with the path and description of each

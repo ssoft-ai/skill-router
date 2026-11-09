@@ -14,7 +14,7 @@ descriptions; a case, `<language>-<skill>`, passes a run when the agent loads th
 node scripts/build-eval-root.js <output folder>
 claude plugin eval <root> --trust-plugin --model haiku --ablation none --mocks off \
   --allow-tools mcp__plugin_skill-router_skill-router__search_skills mcp__plugin_skill-router_skill-router__load_skill \
-  --no-publish --json <result.json>
+  --no-publish --keep-temp --json <result.json>
 node scripts/eval-share.js <result.json>
 ```
 
@@ -28,6 +28,7 @@ of the tree it is given.
 | `--mocks off`, `--allow-tools` | the router has to run as a real MCP server, and a gated tool is granted by its exact name |
 | `--ablation none` | without the router no agent can reach a skill the listing does not show |
 | `--no-publish` | the report stays local |
+| `--keep-temp` | a failed run is read from its trace, which the run's own temporary folder holds and the run deletes without this flag; each run's `tracePath` in the result names that folder, the only one to remove afterwards |
 
 `scripts/eval-share.js` reports, per language, the share of runs that loaded the expected skill,
 and exits 1 when any language falls below the threshold, 0.8 unless given. It refuses a partial

@@ -171,6 +171,33 @@ test('follows a linked folder and stops where a link leads back into a visited o
   assert.deepStrictEqual(index.skills.map((s) => s.path).sort(), [linked, own].sort());
 });
 
+test('resolves the real path of a configured folder and of a link only', (t) => {
+  const root = path.join(dir, 'real-paths');
+  writeSkill(path.join(root, 'a', 'b', 'deep'), 'deep');
+  writeSkill(path.join(root, 'flat'), 'flat');
+  writeSkill(path.join(dir, 'real-paths-elsewhere', 'linked'), 'linked');
+  fs.symlinkSync(path.join(dir, 'real-paths-elsewhere'), path.join(root, 'to-elsewhere'), 'junction');
+  const native = fs.realpathSync.native;
+  const resolved = t.mock.fn((...args) => native(...args));
+  t.mock.method(fs.realpathSync, 'native', resolved);
+  const { skills } = buildIndex([{ folder: root, source: 'test' }]);
+  assert.deepStrictEqual([skills.length, resolved.mock.callCount()], [3, 2]);
+});
+
+test('reads the status of each SKILL.md once', (t) => {
+  const root = path.join(dir, 'one-stat');
+  writeSkill(path.join(root, 'a', 'deep'), 'deep');
+  writeSkill(path.join(root, 'flat'), 'flat');
+  const statSync = fs.statSync;
+  const read = [];
+  t.mock.method(fs, 'statSync', (file, ...rest) => {
+    read.push(path.basename(String(file)));
+    return statSync(file, ...rest);
+  });
+  buildIndex([{ folder: root, source: 'test' }]);
+  assert.deepStrictEqual(read, ['SKILL.md', 'SKILL.md']);
+});
+
 test('takes the folder name and an empty description when the frontmatter gives no text for them', () => {
   const root = path.join(dir, 'odd-values');
   fs.mkdirSync(path.join(root, 'listed'), { recursive: true });

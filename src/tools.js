@@ -2,15 +2,14 @@
 const path = require('node:path');
 const { buildIndex, readSkillText } = require('./index');
 const { existingRealPath, samePath } = require('./paths');
-const { listProjectFiles } = require('./project');
 const { search } = require('./search');
 
-function createTools({ roots, projectDir }) {
+function createTools({ roots }) {
   const cache = new Map();
   const currentIndex = () => buildIndex(roots(), { cache });
 
   function searchSkills({ query, limit }) {
-    return search(currentIndex().skills, query, { limit, projectFiles: () => listProjectFiles(projectDir) });
+    return search(currentIndex().skills, query, { limit });
   }
 
   function loadSkill({ path: requested }) {

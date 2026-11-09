@@ -64,20 +64,6 @@ user's skills first, then the project's, then the plugins' and last those Codex 
 `<project>/.claude/skills` is left out where `$CLAUDE_CONFIG_DIR/skills` holds one of the same name,
 since Claude Code hides it.
 
-## Ranking by project files
-
-A skill whose `metadata` key `paths` matches a file of the project ranks above an otherwise equal
-skill. The key holds glob patterns, as a list or as one string separated by commas:
-
-```yaml
-metadata:
-  paths: "**/*.cpp, **/*.h, CMakeLists.txt"
-```
-
-A pattern without `/` matches a file name at any depth; `*` stays inside one folder, `**` crosses
-any number of them, `{a,b}` gives alternatives. The folders `.git` and `node_modules` are not
-searched.
-
 ## Installation
 
 Node.js 20 or later. The server has no dependencies.

@@ -1,6 +1,6 @@
 'use strict';
 const { createMcpServer } = require('./mcp');
-const { projectDirOf, resolveRoots } = require('./sources');
+const { resolveRoots } = require('./sources');
 const { createTools } = require('./tools');
 const { version } = require('../package.json');
 
@@ -20,8 +20,9 @@ const SEARCH_DEFINITION = {
     properties: {
       query: {
         type: 'string',
-        description: 'The task in a few English words - what is to be done and with what. Write it in English even '
-          + 'when the request is in another language.',
+        description: 'The task in a few English words - what is to be done and with what, naming the language and '
+          + 'the kind of file the task works on, as a task on the tests of a Python module names "Python" and '
+          + '"test". Write it in English even when the request is in another language.',
       },
       limit: { type: 'integer', minimum: 1, maximum: MAX_LIMIT, description: 'The most names to return; 10 when omitted.' },
     },
@@ -49,10 +50,7 @@ function validSearchArguments({ query, limit }) {
 }
 
 function createRouter({ folders, env, home, cwd }) {
-  const tools = createTools({
-    roots: () => resolveRoots({ folders, env, home, cwd }),
-    projectDir: projectDirOf(env, cwd),
-  });
+  const tools = createTools({ roots: () => resolveRoots({ folders, env, home, cwd }) });
   return createMcpServer({
     name: 'skill-router',
     version,

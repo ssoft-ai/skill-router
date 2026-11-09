@@ -4,7 +4,7 @@ const assert = require('node:assert');
 const { ABBREVIATIONS } = require('../src/abbreviations');
 const { search } = require('../src/search');
 
-const skill = (name, description, metadata = {}, body = '') => ({ name, description, metadata, body, path: `/skills/${name}/SKILL.md`, folder: `/skills/${name}` });
+const skill = (name, description, body = '') => ({ name, description, body, path: `/skills/${name}/SKILL.md`, folder: `/skills/${name}` });
 
 const skills = [
   skill('commit-rules', 'Apply when writing or reviewing commit messages or naming branches'),
@@ -12,6 +12,24 @@ const skills = [
   skill('debugging', 'Apply when investigating a bug, test failure, or unexpected behavior'),
   skill('release', 'Apply when preparing a release, bumping version, or tagging'),
 ];
+
+test('ranks a set of skills one of which changed as a first search over that set ranks it', () => {
+  const query = 'draw the release diagram';
+  search(skills, query);
+  const changed = [skills[0], skill('changelog', 'Apply when a release diagram is drawn'), ...skills.slice(2)];
+  assert.deepStrictEqual(search(changed, query), search(changed, query, { abbreviations: [...ABBREVIATIONS] }));
+});
+
+test('counts the field lengths and word frequencies again only once a skill of the set changed', (t) => {
+  const corpus = require('../src/corpus');
+  const counted = t.mock.method(corpus, 'corpusOf');
+  const abbreviations = [...ABBREVIATIONS];
+  search(skills, 'commit', { abbreviations });
+  search(skills, 'release', { abbreviations });
+  const unchangedCounts = counted.mock.callCount();
+  search([skill('other', 'Apply when notes are written'), ...skills.slice(1)], 'commit', { abbreviations });
+  assert.deepStrictEqual([unchangedCounts, counted.mock.callCount()], [1, 2]);
+});
 
 test('ranks first the skill sharing the most telling words with the request', () => {
   const results = search(skills, 'write the commit message');
@@ -29,22 +47,22 @@ test('finds a skill described in another language that spaces its words by a req
 });
 
 test('finds a skill by a word only its instructions write', () => {
-  const bisect = skill('history-search', 'Apply when a defect has to be traced to a change', {}, 'Run git bisect between a good and a bad tag.');
+  const bisect = skill('history-search', 'Apply when a defect has to be traced to a change', 'Run git bisect between a good and a bad tag.');
   const results = search([...skills, bisect], 'bisect');
   assert.deepStrictEqual(results.map((r) => r.name), ['history-search']);
 });
 
 test('ranks a skill writing a query word in its description above one writing it in its instructions instead, whatever the lengths and repeats', () => {
   const words = (prefix, count) => Array.from({ length: count }, (_, n) => `${prefix}${n}`).join(' ');
-  const others = Array.from({ length: 20 }, (_, n) => skill(`other${n}`, words('d', 8), {}, words('w', 400)));
+  const others = Array.from({ length: 20 }, (_, n) => skill(`other${n}`, words('d', 8), words('w', 400)));
   const orders = [];
   for (const descriptionLength of [3, 30, 100, 300]) {
     for (const instructionsLength of [3, 400]) {
       for (const repeats of [1, 50]) {
         const description = words('x', descriptionLength);
         const instructions = words('y', instructionsLength);
-        const described = skill('alpha', `${description} bisect`, {}, instructions);
-        const instructed = skill('gamma', description, {}, `${instructions} ${'bisect '.repeat(repeats)}`);
+        const described = skill('alpha', `${description} bisect`, instructions);
+        const instructed = skill('gamma', description, `${instructions} ${'bisect '.repeat(repeats)}`);
         orders.push(search([...others, instructed, described], 'bisect').map((r) => r.name).join());
       }
     }
@@ -62,7 +80,7 @@ test('ranks a skill repeating a query word in a field no higher than one writing
   const fields = [
     (word, other) => skill(`${word} ${other}`, 'Apply when a service is run'),
     (word, other) => skill(other, `Apply when a ${word} is run`),
-    (word, other) => skill(other, 'Apply when a service is run', {}, `Run the ${word}.`),
+    (word, other) => skill(other, 'Apply when a service is run', `Run the ${word}.`),
   ];
   const orders = fields.map((write) => {
     const once = { ...write('rollback', 'once'), path: '/once/SKILL.md' };
@@ -77,7 +95,7 @@ const team = [
   skill('review-rules', 'Apply when opening or reviewing a PR or an MR'),
   skill('style', 'Apply when writing issue, PR or commit text'),
   skill('forge', 'Apply when a merge request or a pull request is opened on the forge'),
-  skill('pipelines', 'Apply when the continuous integration pipeline fails', {}, 'Rerun the job; read the API logs.'),
+  skill('pipelines', 'Apply when the continuous integration pipeline fails', 'Rerun the job; read the API logs.'),
   skill('editor', 'Apply when the integrated development environment is set up'),
   skill('translations', 'Apply when the l10n strings are updated'),
 ];
@@ -134,22 +152,6 @@ test('ranks a query writing an abbreviation or a full form in the plural as one 
   assert.deepStrictEqual([listedPlurals.length > 0, differing], [true, []]);
 });
 
-test('ranks a skill whose paths match a project file above an otherwise equal one', () => {
-  const python = skill('python-style', 'Apply when writing code', { paths: ['**/*.py'] });
-  const cpp = skill('cpp-style', 'Apply when writing code', { paths: '**/*.h, **/*.cpp' });
-  const results = search([python, cpp], 'writing code', { projectFiles: ['src/main.cpp'] });
-  assert.deepStrictEqual(results.map((r) => r.name), ['cpp-style', 'python-style']);
-});
-
-test('lists the project files only when some skill has paths', () => {
-  let listed = 0;
-  const projectFiles = () => { listed++; return ['src/main.cpp']; };
-  search(skills, 'commit', { projectFiles });
-  const unlistedRuns = listed;
-  search([...skills, skill('cpp', 'Apply when writing commit code', { paths: '**/*.cpp' })], 'commit', { projectFiles });
-  assert.deepStrictEqual([unlistedRuns, listed], [0, 1]);
-});
-
 test('returns every skill of one name as one result, in the order found, whichever of them matches', () => {
   const copies = ['/user', '/plugin', '/project'].map((root) => ({ ...skill('notes', 'Apply when notes are written'), path: `${root}/notes/SKILL.md` }));
   const found = copies.map((_, matching) => {
@@ -204,7 +206,7 @@ test('reads the longest full form a query writes, whichever order the table list
 });
 
 test('weighs a word of a description by the names and descriptions holding it, however many instructions hold it', () => {
-  const others = Array.from({ length: 6 }, (_, n) => skill(`other${n}`, 'Apply when a service is run', {}, 'Cut a release of the service.'));
+  const others = Array.from({ length: 6 }, (_, n) => skill(`other${n}`, 'Apply when a service is run', 'Cut a release of the service.'));
   const announcing = skill('announcing', 'Apply when a release is announced');
   const drafting = skill('drafting', 'Apply when text is written');
   const coding = skill('coding', 'Apply when code is written');
@@ -232,8 +234,8 @@ test('leaves the articles, conjunctions and prepositions of a query out of the s
 });
 
 test('ranks the skills writing a query word in their descriptions above one writing it in its instructions, however many they are', () => {
-  const described = Array.from({ length: 6 }, (_, n) => skill(`described${n}`, `Apply when canary ${n} is run`, {}, 'Run the service.'));
-  const instructed = skill('instructed', 'Apply when a service is run', {}, 'Run the canary.');
+  const described = Array.from({ length: 6 }, (_, n) => skill(`described${n}`, `Apply when canary ${n} is run`, 'Run the service.'));
+  const instructed = skill('instructed', 'Apply when a service is run', 'Run the canary.');
   assert.strictEqual(search([instructed, ...described], 'canary').map((r) => r.name).indexOf('instructed'), described.length);
 });
 
