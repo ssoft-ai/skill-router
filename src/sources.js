@@ -1,20 +1,17 @@
 'use strict';
 const fs = require('node:fs');
 const path = require('node:path');
+const { configDirOf, projectDirOf, readJson, settingsFilesByPrecedence } = require('./claude-settings');
 const { existingRealPath, samePath } = require('./paths');
 
 function resolveRoots({ folders, env, home, cwd }) {
   if (folders.length > 0) return folders.map((folder) => ({ folder: path.resolve(cwd, folder), source: 'configured' }));
   return defaultRoots({
-    configDir: env.CLAUDE_CONFIG_DIR || path.join(home, '.claude'),
+    configDir: configDirOf(env, home),
     claudeStateFile: env.CLAUDE_CONFIG_DIR ? path.join(env.CLAUDE_CONFIG_DIR, '.claude.json') : path.join(home, '.claude.json'),
     codexHome: env.CODEX_HOME || path.join(home, '.codex'),
     projectDir: projectDirOf(env, cwd),
   });
-}
-
-function projectDirOf(env, cwd) {
-  return env.CLAUDE_PROJECT_DIR || cwd;
 }
 
 function defaultRoots({ configDir, claudeStateFile, codexHome, projectDir }) {
@@ -50,24 +47,8 @@ function foldersUpToRepositoryRoot(projectDir) {
 }
 
 function pluginRoots(configDir, projectDir) {
-  const registry = readJson(path.join(configDir, 'plugins', 'installed_plugins.json'));
-  const enabled = enabledPlugins(configDir, projectDir);
-  const installed = new Map();
-  for (const [id, installs] of Object.entries(registry?.plugins ?? {})) {
-    if (enabled[id] !== true || !Array.isArray(installs)) continue;
-    const active = installs.filter((install) => typeof install?.installPath === 'string'
-      && (typeof install.projectPath !== 'string' || isProject(install.projectPath, projectDir)));
-    if (active.length === 0) continue;
-    const manifests = active.map((install) => ({
-      install,
-      manifest: readJson(path.join(install.installPath, '.claude-plugin', 'plugin.json')) ?? {},
-    }));
-    installed.set(id, manifests);
-  }
-  const loads = loadingPlugins(installed);
   const roots = [];
-  for (const [id, manifests] of installed) {
-    if (!loads(id)) continue;
+  for (const [id, manifests] of loadedPlugins(configDir, projectDir)) {
     for (const { install, manifest } of manifests) {
       const declared = [manifest.skills ?? []].flat().filter((folder) => typeof folder === 'string');
       for (const folder of ['skills', ...declared]) {
@@ -76,6 +57,25 @@ function pluginRoots(configDir, projectDir) {
     }
   }
   return roots;
+}
+
+function loadedPlugins(configDir, projectDir, read = readJson) {
+  const registry = read(path.join(configDir, 'plugins', 'installed_plugins.json'));
+  const enabled = enabledPlugins(configDir, projectDir, read);
+  const installed = new Map();
+  for (const [id, installs] of Object.entries(registry?.plugins ?? {})) {
+    if (enabled[id] !== true || !Array.isArray(installs)) continue;
+    const active = installs.filter((install) => typeof install?.installPath === 'string'
+      && (typeof install.projectPath !== 'string' || isProject(install.projectPath, projectDir)));
+    if (active.length === 0) continue;
+    const manifests = active.map((install) => ({
+      install,
+      manifest: read(path.join(install.installPath, '.claude-plugin', 'plugin.json')) ?? {},
+    }));
+    installed.set(id, manifests);
+  }
+  const loads = loadingPlugins(installed);
+  return new Map([...installed].filter(([id]) => loads(id)));
 }
 
 function loadingPlugins(installed) {
@@ -101,21 +101,9 @@ function dependencyId(dependency, dependentId) {
   return name.includes('@') ? name : `${name}@${marketplace}`;
 }
 
-function enabledPlugins(configDir, projectDir) {
-  const settingsFiles = [
-    path.join(configDir, 'settings.json'),
-    path.join(projectDir, '.claude', 'settings.json'),
-    path.join(projectDir, '.claude', 'settings.local.json'),
-  ];
-  return Object.assign({}, ...settingsFiles.map((file) => readJson(file)?.enabledPlugins ?? {}));
-}
-
-function readJson(file) {
-  try {
-    return JSON.parse(fs.readFileSync(file, 'utf8'));
-  } catch {
-    return null;
-  }
+function enabledPlugins(configDir, projectDir, read) {
+  const settingsFiles = settingsFilesByPrecedence(configDir, projectDir);
+  return Object.assign({}, ...settingsFiles.map((file) => read(file)?.enabledPlugins ?? {}));
 }
 
 function isProject(installedFor, projectDir) {
@@ -123,4 +111,4 @@ function isProject(installedFor, projectDir) {
   return samePath(canonical(installedFor), canonical(projectDir));
 }
 
-module.exports = { defaultRoots, resolveRoots };
+module.exports = { defaultRoots, loadedPlugins, resolveRoots };

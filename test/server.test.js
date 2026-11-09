@@ -29,5 +29,5 @@ test('answers MCP requests over standard input and output, one JSON message per 
   });
   const responses = run.stdout.trim().split('\n').map((line) => JSON.parse(line));
   assert.deepStrictEqual(responses.map((r) => r.id), [1, 2]);
-  assert.strictEqual(JSON.parse(responses[1].result.content[0].text)[0].name, 'debugging');
+  assert.strictEqual(responses[1].result.content[0].text.split('\n')[0], 'debugging');
 });

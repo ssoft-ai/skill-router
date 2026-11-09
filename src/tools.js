@@ -1,27 +1,38 @@
 'use strict';
 const path = require('node:path');
+const { parseSkillFile } = require('./frontmatter');
 const { buildIndex, readSkillText } = require('./index');
 const { existingRealPath, samePath } = require('./paths');
 const { search } = require('./search');
 
-function createTools({ roots }) {
+function createTools({ roots, home }) {
   const cache = new Map();
   const currentIndex = () => buildIndex(roots(), { cache });
+  const homePrefix = home ? `${path.resolve(home)}${path.sep}` : null;
+
+  function shownPath(target) {
+    return homePrefix && samePath(target.slice(0, homePrefix.length), homePrefix)
+      ? `~${path.sep}${target.slice(homePrefix.length)}` : target;
+  }
+
+  function givenPath(shown) {
+    return homePrefix && /^~[\\/]/.test(shown) ? path.join(homePrefix, shown.slice(2)) : shown;
+  }
 
   function searchSkills({ query, limit }) {
     return search(currentIndex().skills, query, { limit });
   }
 
   function loadSkill({ path: requested }) {
-    const spellings = indexedSpellings(requested);
+    const spellings = indexedSpellings(typeof requested === 'string' ? givenPath(requested) : requested);
     const skill = spellings.length > 0 && currentIndex().skills
       .find((s) => spellings.some((spelling) => samePath(s.path, spelling) || samePath(s.folder, spelling)));
     const content = skill && readSkillText(skill.path);
     if (typeof content !== 'string') throw new Error(`not a skill of the index: ${requested}`);
-    return { folder: skill.folder, content };
+    return { folder: skill.folder, instructions: parseSkillFile(content).body.replace(/^﻿/, '').replace(/^\s*\n/, '') };
   }
 
-  return { searchSkills, loadSkill };
+  return { searchSkills, loadSkill, shownPath };
 }
 
 function indexedSpellings(requested) {

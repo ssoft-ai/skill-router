@@ -5,32 +5,11 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { defaultRoots, resolveRoots } = require('../src/sources');
+const { enable, installPlugin, writeJson } = require('../test-support/plugins');
 
 let dir;
 before(() => { dir = fs.mkdtempSync(path.join(os.tmpdir(), 'skill-router-sources-')); });
 after(() => fs.rmSync(dir, { recursive: true, force: true }));
-
-function writeJson(file, value) {
-  fs.mkdirSync(path.dirname(file), { recursive: true });
-  fs.writeFileSync(file, JSON.stringify(value));
-}
-
-function enable(settingsFile, id, value) {
-  const current = fs.existsSync(settingsFile) ? JSON.parse(fs.readFileSync(settingsFile, 'utf8')) : {};
-  current.enabledPlugins = { ...current.enabledPlugins, [id]: value };
-  writeJson(settingsFile, current);
-}
-
-function installPlugin(configDir, id, entry, manifest = {}) {
-  enable(path.join(configDir, 'settings.json'), id, true);
-  const installPath = path.join(configDir, 'plugins', 'cache', id.replace('@', '-'));
-  writeJson(path.join(installPath, '.claude-plugin', 'plugin.json'), { name: id.split('@')[0], ...manifest });
-  const registry = path.join(configDir, 'plugins', 'installed_plugins.json');
-  const current = fs.existsSync(registry) ? JSON.parse(fs.readFileSync(registry, 'utf8')) : { version: 2, plugins: {} };
-  current.plugins[id] = [{ installPath, version: '1.0.0', ...entry }];
-  writeJson(registry, current);
-  return installPath;
-}
 
 test('searches the skills folder of a user plugin and the paths its manifest adds', () => {
   const configDir = path.join(dir, 'user-plugin', 'config');

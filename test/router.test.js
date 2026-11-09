@@ -38,7 +38,7 @@ const writeSkill = (folder, name, description, paths, instructions = '') => {
 const searchNames = (folder, project) => {
   const projectRouter = createRouter({ folders: [folder], env: { CLAUDE_PROJECT_DIR: project }, home: dir, cwd: project });
   const result = projectRouter.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'search_skills', arguments: { query: 'writing code' } } }).result;
-  return JSON.parse(result.content[0].text).map((found) => found.name);
+  return result.content[0].text.split('\n').filter((line) => !line.startsWith(' '));
 };
 
 test('ranks a skill whose metadata paths match a project file where it ranks without them', () => {
@@ -72,11 +72,36 @@ test('lists no file of the project when it searches', (t) => {
   assert.deepStrictEqual(read.filter((folder) => [path.resolve(project), projectRoot].some((root) => folder === root || folder.startsWith(`${root}${path.sep}`))), []);
 });
 
-test('finds a nested skill and loads it by the path the search returned', () => {
-  const [found] = JSON.parse(call('search_skills', { query: 'commit message' }).content[0].text);
-  const loaded = call('load_skill', { path: found.skills[0].path });
-  assert.strictEqual(found.name, 'commit-rules');
-  assert.match(loaded.content[0].text, new RegExp(`^Skill folder: .*commit-rules\\n\\n---\\nname: commit-rules`));
+test('finds a nested skill and loads its instructions by the folder the search returned', () => {
+  const [name, folder, description] = call('search_skills', { query: 'commit message' }).content[0].text.split('\n');
+  const loaded = call('load_skill', { path: folder.trim() });
+  assert.deepStrictEqual([name, description, loaded.content[0].text],
+    ['commit-rules', '  Apply when writing commit messages', `Skill folder: ${folder.trim()}\n\nUse the imperative.\n`]);
+});
+
+test('lists under one name the folders of its skills, each description once after the folders sharing it', () => {
+  const folder = path.join(dir, 'copies');
+  writeSkill(folder, 'notes', 'Apply when notes are written');
+  writeSkill(path.join(folder, 'v1'), 'notes', 'Apply when notes are written');
+  writeSkill(path.join(folder, 'other'), 'notes', 'Apply when notes of a meeting are written');
+  const copies = createRouter({ folders: [folder], env: {}, home: path.join(dir, 'elsewhere'), cwd: dir });
+  const result = copies.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'search_skills', arguments: { query: 'notes' } } }).result;
+  const real = fs.realpathSync.native(folder);
+  const [name, ...lines] = result.content[0].text.split('\n').map((line) => line.trim());
+  const groups = [];
+  let folders = [];
+  for (const line of lines) {
+    if (path.isAbsolute(line)) folders.push(line);
+    else { groups.push([line, folders.sort()]); folders = []; }
+  }
+  assert.deepStrictEqual([name, groups.sort()], ['notes', [
+    ['Apply when notes are written', [path.join(real, 'notes'), path.join(real, 'v1', 'notes')].sort()],
+    ['Apply when notes of a meeting are written', [path.join(real, 'other', 'notes')]],
+  ].sort()]);
+});
+
+test('answers a search no skill fits in words', () => {
+  assert.strictEqual(call('search_skills', { query: 'zzzz qqqq' }).content[0].text, 'No skill fits.');
 });
 
 test('accepts the limits 1 and 20', () => {

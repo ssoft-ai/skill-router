@@ -39,9 +39,8 @@ result missing a case of this folder.
 
 - The agent works in an empty folder: a request it cannot act on there may end before it loads a
   skill.
-- A grader matches the path of the expected skill only, so a run that loads a listed skill of the
-  same concern instead fails, as does a run that loads the skill by its folder path, which
-  `load_skill` also accepts.
+- A grader matches the folder of the expected skill only, so a run that loads a listed skill of the
+  same concern instead fails.
 - The search matches words, so a skill whose name, description and instructions share none with
   the agent's query stays out of the results: the agent searched the task for `threat-modelling` as
   a security review of file sharing, which only the domain skill `security` matches.
