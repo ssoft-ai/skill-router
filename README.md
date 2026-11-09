@@ -36,8 +36,9 @@ where the language spaces its words; Chinese or Japanese text matches only as a 
 `${CLAUDE_SKILL_DIR}` and grants no `allowed-tools`.
 
 Every call walks the skill folders, at any folder depth, so a skill added or removed is found by the
-next call; a `SKILL.md` is read again only when its modification time or size changed since the
-previous call.
+next call. The walk enters no folder whose name starts with a dot, such as `.git` or `.trash`, and
+no `node_modules` folder. A `SKILL.md` is read again only when its modification time or size
+changed since the previous call.
 A `SKILL.md` larger than 1 MiB is left out of the index. Two skills of one name both stay, each
 under its own path.
 
@@ -47,10 +48,12 @@ Folders given as arguments to `server.js` replace the defaults below.
 
 | Agent | Folders |
 |---|---|
-| Claude Code | the `skills/` folder of every installed plugin Claude Code loads - enabled in the user or project settings, with every plugin it depends on loading too - and the folders its `plugin.json` key `skills` names, a project plugin only in its project; `$CLAUDE_CONFIG_DIR/skills` (`~/.claude/skills`); `<project>/.claude/skills` |
-| Codex | `$CODEX_HOME/skills` (`~/.codex/skills`); `.agents/skills` and `.codex/skills` in the project and in every folder above it up to the root of its git repository |
+| Claude Code | the `skills/` folder of every installed plugin Claude Code loads - enabled in the user or project settings, with every plugin it depends on loading too - and the folders its `plugin.json` key `skills` names, a project plugin only in its project; `$CLAUDE_CONFIG_DIR/skills` (`~/.claude/skills`) without its `synced` folder, and `synced/<organization>_<account>` in it, the claude.ai skills of the account Claude Code is signed in to, read from `oauthAccount` in `$CLAUDE_CONFIG_DIR/.claude.json` (`~/.claude.json`); `<project>/.claude/skills` |
+| Codex | `$CODEX_HOME/skills` (`~/.codex/skills`) and its `.system` folder, the skills Codex ships; `.agents/skills` and `.codex/skills` in the project and in every folder above it up to the root of its git repository |
 
-The project is `$CLAUDE_PROJECT_DIR`, or the folder the server starts in.
+The project is `$CLAUDE_PROJECT_DIR`, or the folder the server starts in. A skill in
+`<project>/.claude/skills` is left out where `$CLAUDE_CONFIG_DIR/skills` holds one of the same name,
+since Claude Code hides it.
 
 ## Ranking by project files
 

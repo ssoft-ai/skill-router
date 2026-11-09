@@ -2,6 +2,7 @@
 const fs = require('node:fs');
 const path = require('node:path');
 const { parseSkillFile } = require('./frontmatter');
+const { existingRealPath, samePath } = require('./paths');
 
 const SKILL_FILE = 'SKILL.md';
 const DEFAULT_MAX_ENTRIES = 200000;
@@ -9,20 +10,26 @@ const MAX_SKILL_BYTES = 1024 * 1024;
 
 function buildIndex(roots, { maxEntries = DEFAULT_MAX_ENTRIES, cache = new Map() } = {}) {
   const visited = new Set();
-  const skills = [];
+  const found = [];
   const indexed = new Set();
-  for (const { folder, source } of roots) {
-    for (const file of findSkillFiles(folder, { visited, entriesLeft: maxEntries })) {
+  const namesBySource = new Set();
+  for (const { folder, source, excluded = [], hiddenBy } of roots) {
+    const skipped = excluded.map(existingRealPath).filter(Boolean);
+    for (const file of findSkillFiles(folder, { visited, entriesLeft: maxEntries, skipped })) {
       if (indexed.has(file)) continue;
       const skill = cachedSkill(file, source, cache);
       if (!skill) continue;
       indexed.add(file);
-      skills.push(skill);
+      found.push({ skill, hiddenBy });
+      namesBySource.add(sourceAndName(source, skill.name));
     }
   }
   for (const file of cache.keys()) if (!indexed.has(file)) cache.delete(file);
-  return { skills };
+  const skills = found.filter(({ skill, hiddenBy }) => !hiddenBy || !namesBySource.has(sourceAndName(hiddenBy, skill.name)));
+  return { skills: skills.map(({ skill }) => skill) };
 }
+
+const sourceAndName = (source, name) => JSON.stringify([source, name]);
 
 function cachedSkill(file, source, cache) {
   let stat;
@@ -58,7 +65,7 @@ function findSkillFiles(folder, walk) {
   for (const entry of entries) {
     if (walk.entriesLeft-- <= 0) break;
     const entryPath = path.join(real, entry.name);
-    if (entry.name === '.git') continue;
+    if (isServiceFolderName(entry.name) || walk.skipped.some((skipped) => samePath(skipped, entryPath))) continue;
     if (entry.isDirectory() || (entry.isSymbolicLink() && isFolder(entryPath))) {
       found.push(...findSkillFiles(entryPath, walk));
     } else if (entry.name === SKILL_FILE) {
@@ -68,6 +75,8 @@ function findSkillFiles(folder, walk) {
   }
   return found;
 }
+
+const isServiceFolderName = (name) => name.startsWith('.') || name === 'node_modules';
 
 function isFolder(link) {
   try {

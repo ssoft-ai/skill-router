@@ -104,8 +104,8 @@ test("searches the user's and the project's Claude Code skill folders", () => {
   const projectDir = path.join(dir, 'claude', 'project');
   const roots = defaultRoots({ configDir, codexHome: path.join(dir, 'none'), projectDir });
   assert.deepStrictEqual(roots.filter((r) => r.source.startsWith('claude-')), [
-    { folder: path.join(configDir, 'skills'), source: 'claude-user' },
-    { folder: path.join(projectDir, '.claude', 'skills'), source: 'claude-project' },
+    { folder: path.join(configDir, 'skills'), source: 'claude-user', excluded: [path.join(configDir, 'skills', 'synced')] },
+    { folder: path.join(projectDir, '.claude', 'skills'), source: 'claude-project', hiddenBy: 'claude-user' },
   ]);
 });
 
@@ -122,10 +122,11 @@ test('takes the configuration, Codex and project folders from the environment fi
   const folders = resolveRoots({ folders: [], env, home: path.join(dir, 'home'), cwd: path.join(dir, 'cwd') }).map((r) => r.folder);
   assert.deepStrictEqual(folders, [
     path.join(dir, 'cc', 'skills'),
-    path.join(dir, 'pr', '.claude', 'skills'),
     path.join(dir, 'cx', 'skills'),
+    path.join(dir, 'pr', '.claude', 'skills'),
     path.join(dir, 'pr', '.agents', 'skills'),
     path.join(dir, 'pr', '.codex', 'skills'),
+    path.join(dir, 'cx', 'skills', '.system'),
   ]);
 });
 
@@ -135,10 +136,11 @@ test('falls back to the home and working folders when the environment names none
   const folders = resolveRoots({ folders: [], env: {}, home, cwd }).map((r) => r.folder);
   assert.deepStrictEqual(folders, [
     path.join(home, '.claude', 'skills'),
-    path.join(cwd, '.claude', 'skills'),
     path.join(home, '.codex', 'skills'),
+    path.join(cwd, '.claude', 'skills'),
     path.join(cwd, '.agents', 'skills'),
     path.join(cwd, '.codex', 'skills'),
+    path.join(home, '.codex', 'skills', '.system'),
   ]);
 });
 
@@ -163,5 +165,44 @@ test("searches the user's and the project's Codex skill folders", () => {
     { folder: path.join(codexHome, 'skills'), source: 'codex-user' },
     { folder: path.join(projectDir, '.agents', 'skills'), source: 'codex-project' },
     { folder: path.join(projectDir, '.codex', 'skills'), source: 'codex-project' },
+    { folder: path.join(codexHome, 'skills', '.system'), source: 'codex-system' },
   ]);
+});
+
+test("lists the user's folders first, then the project's, then the plugins' and last the skills Codex ships", () => {
+  const configDir = path.join(dir, 'order', 'config');
+  const projectDir = path.join(dir, 'order', 'project');
+  installPlugin(configDir, 'tools@m', {});
+  writeJson(path.join(configDir, '.claude.json'), { oauthAccount: { organizationUuid: 'org-1', accountUuid: 'acc-1' } });
+  const roots = defaultRoots({ configDir, claudeStateFile: path.join(configDir, '.claude.json'),
+    codexHome: path.join(dir, 'order', 'codex'), projectDir });
+  const sources = roots.map((r) => r.source).filter((source, n, all) => all.indexOf(source) === n);
+  assert.deepStrictEqual(sources,
+    ['claude-user', 'claude-synced', 'codex-user', 'claude-project', 'codex-project', 'plugin:tools@m', 'codex-system']);
+});
+
+const account = { organizationUuid: 'org-1', accountUuid: 'acc-2' };
+
+test('searches the claude.ai skills synced for the account Claude Code is signed in to, after the user skills', () => {
+  const home = path.join(dir, 'synced', 'home');
+  const configDir = path.join(dir, 'synced', 'config');
+  writeJson(path.join(configDir, '.claude.json'), { oauthAccount: account });
+  writeJson(path.join(home, '.claude.json'), { oauthAccount: { organizationUuid: 'org-9', accountUuid: 'acc-9' } });
+  const syncedOf = (env) => resolveRoots({ folders: [], env, home, cwd: path.join(dir, 'synced', 'cwd') })
+    .filter((r) => r.source.startsWith('claude-user') || r.source === 'claude-synced').map((r) => r.folder);
+  assert.deepStrictEqual([syncedOf({ CLAUDE_CONFIG_DIR: configDir }), syncedOf({})], [
+    [path.join(configDir, 'skills'), path.join(configDir, 'skills', 'synced', 'org-1_acc-2')],
+    [path.join(home, '.claude', 'skills'), path.join(home, '.claude', 'skills', 'synced', 'org-9_acc-9')],
+  ]);
+});
+
+test('searches no synced folder when the account Claude Code is signed in to is missing or names no plain folder', () => {
+  const states = [{ userID: 'local' }, { oauthAccount: { organizationUuid: '..', accountUuid: '..' } }, { oauthAccount: { organizationUuid: 'org-1' } }];
+  const synced = states.map((state, n) => {
+    const configDir = path.join(dir, 'unsigned', String(n));
+    writeJson(path.join(configDir, '.claude.json'), state);
+    const roots = resolveRoots({ folders: [], env: { CLAUDE_CONFIG_DIR: configDir }, home: path.join(dir, 'unsigned', 'home'), cwd: dir });
+    return roots.filter((r) => r.source === 'claude-synced');
+  });
+  assert.deepStrictEqual(synced, [[], [], []]);
 });

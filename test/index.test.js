@@ -139,6 +139,19 @@ test('keeps two skills of the same name, each under its path', () => {
   );
 });
 
+test('leaves out a skill of a folder another source hides by a skill of the same name, as Claude Code hides a project skill', () => {
+  const user = writeSkill(path.join(dir, 'hidden', 'user', 'review'), 'review');
+  writeSkill(path.join(dir, 'hidden', 'project', 'review'), 'review');
+  const own = writeSkill(path.join(dir, 'hidden', 'project', 'deploy'), 'deploy');
+  const codex = writeSkill(path.join(dir, 'hidden', 'codex', 'review'), 'review');
+  const index = buildIndex([
+    { folder: path.join(dir, 'hidden', 'user'), source: 'claude-user' },
+    { folder: path.join(dir, 'hidden', 'project'), source: 'claude-project', hiddenBy: 'claude-user' },
+    { folder: path.join(dir, 'hidden', 'codex'), source: 'codex-project' },
+  ]);
+  assert.deepStrictEqual(index.skills.map((s) => s.path).sort(), [user, own, codex].sort());
+});
+
 test('lists a skill once when two configured folders overlap', () => {
   const file = writeSkill(path.join(dir, 'overlap', 'inner', 'only'), 'only');
   const index = buildIndex([
@@ -218,6 +231,36 @@ test('leaves out the .git folder of a skill repository', () => {
   const kept = writeSkill(path.join(root, 'kept'), 'kept');
   writeSkill(path.join(root, '.git', 'stray'), 'stray');
   assert.deepStrictEqual(buildIndex([{ folder: root, source: 'test' }]).skills.map((s) => s.path), [kept]);
+});
+
+test('leaves out every folder whose name starts with a dot and every node_modules folder', () => {
+  const root = path.join(dir, 'service');
+  const kept = writeSkill(path.join(root, 'kept'), 'kept');
+  writeSkill(path.join(root, '.trash', '1791476929054', 'removed'), 'removed');
+  writeSkill(path.join(root, '.hidden'), 'hidden');
+  writeSkill(path.join(root, 'kept', 'scripts', 'node_modules', 'package'), 'package');
+  assert.deepStrictEqual(buildIndex([{ folder: root, source: 'test' }]).skills.map((s) => s.path), [kept]);
+});
+
+test('leaves out the folders a configured folder excludes, though another configured folder lies inside them', () => {
+  const root = path.join(dir, 'excluding');
+  const kept = writeSkill(path.join(root, 'kept'), 'kept');
+  const synced = path.join(root, 'synced');
+  writeSkill(path.join(synced, 'other-account', 'docx'), 'docx');
+  const current = writeSkill(path.join(synced, 'this-account', 'pdf'), 'pdf');
+  const roots = [{ folder: root, source: 'user', excluded: [synced] }, { folder: path.join(synced, 'this-account'), source: 'synced' }];
+  assert.deepStrictEqual(buildIndex(roots).skills.map((s) => s.path), [kept, current]);
+});
+
+test('follows a link another configured folder holds into the folder one configured folder excludes', () => {
+  const user = path.join(dir, 'linked-excluded', 'user');
+  const synced = path.join(user, 'synced');
+  const docx = writeSkill(path.join(synced, 'other-account', 'docx'), 'docx');
+  const project = path.join(dir, 'linked-excluded', 'project');
+  fs.mkdirSync(project, { recursive: true });
+  fs.symlinkSync(path.join(synced, 'other-account'), path.join(project, 'shared'), 'junction');
+  const roots = [{ folder: user, source: 'user', excluded: [synced] }, { folder: project, source: 'project' }];
+  assert.deepStrictEqual(buildIndex(roots).skills.map((s) => [s.path, s.source]), [[docx, 'project']]);
 });
 
 test('skips a configured folder that does not exist', () => {
