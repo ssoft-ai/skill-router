@@ -131,4 +131,4 @@ function readSkill(file, source, size) {
   };
 }
 
-module.exports = { buildIndex, readSkillText };
+module.exports = { buildIndex, readSkill, readSkillText };

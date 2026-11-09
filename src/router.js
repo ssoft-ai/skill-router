@@ -63,6 +63,20 @@ function searchText(results, shown) {
   }).join('\n');
 }
 
+const NO_SKILL = 'No skill fits.';
+const FOLDER_LABEL = 'Skill folder: ';
+
+function searchedNames(text) {
+  if (text === NO_SKILL) return [];
+  const lines = text.split('\n');
+  return lines.some((line) => line.startsWith('  ')) ? lines.filter((line) => line && !line.startsWith(' ')) : null;
+}
+
+function loadedFolder(text) {
+  const [first] = text.split('\n');
+  return first.startsWith(FOLDER_LABEL) ? first.slice(FOLDER_LABEL.length) : null;
+}
+
 function createRouter({ folders, env, home, cwd }) {
   const tools = createTools({ roots: () => resolveRoots({ folders, env, home, cwd }), home });
   return createMcpServer({
@@ -72,17 +86,17 @@ function createRouter({ folders, env, home, cwd }) {
     tools: [
       {
         definition: SEARCH_DEFINITION,
-        handler: (args) => searchText(tools.searchSkills(validSearchArguments(args)), tools.shownPath) || 'No skill fits.',
+        handler: (args) => searchText(tools.searchSkills(validSearchArguments(args)), tools.shownPath) || NO_SKILL,
       },
       {
         definition: LOAD_DEFINITION,
         handler: (args) => {
           const { folder, instructions } = tools.loadSkill(args);
-          return `Skill folder: ${tools.shownPath(folder)}\n\n${instructions}`;
+          return `${FOLDER_LABEL}${tools.shownPath(folder)}\n\n${instructions}`;
         },
       },
     ],
   });
 }
 
-module.exports = { createRouter };
+module.exports = { createRouter, loadedFolder, searchedNames };

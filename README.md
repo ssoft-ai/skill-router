@@ -78,7 +78,9 @@ claude plugin install skill-router@ssoft-ai
 ```
 
 The plugin loads both tools into every session and adds to each request a reminder to search
-the skills, in English words, before any other tool.
+the skills, in English words, before any other tool. Once a search or a load completes, the console
+shows the names the search found, or that it found none, and the name of the skill loaded; the
+model's context does not receive these notices.
 
 Its option `skill_names_only`, on by default, shows every installed skill in Claude Code's skill
 listing by its name alone, plugin skills included, so the descriptions no longer fill the context
