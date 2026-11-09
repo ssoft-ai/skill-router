@@ -14,10 +14,12 @@ function buildIndex(roots, { maxEntries = DEFAULT_MAX_ENTRIES, cache = new Map()
   const indexed = new Set();
   const namesBySource = new Set();
   for (const { folder, source, excluded = [], hiddenBy } of roots) {
+    const real = existingRealPath(folder);
+    if (!real) continue;
     const skipped = excluded.map(existingRealPath).filter(Boolean);
-    for (const file of findSkillFiles(folder, { visited, entriesLeft: maxEntries, skipped })) {
+    for (const { file, stat } of walkRealFolder(real, { visited, entriesLeft: maxEntries, skipped })) {
       if (indexed.has(file)) continue;
-      const skill = cachedSkill(file, source, cache);
+      const skill = cachedSkill(file, source, cache, stat);
       if (!skill) continue;
       indexed.add(file);
       found.push({ skill, hiddenBy });
@@ -31,10 +33,10 @@ function buildIndex(roots, { maxEntries = DEFAULT_MAX_ENTRIES, cache = new Map()
 
 const sourceAndName = (source, name) => JSON.stringify([source, name]);
 
-function cachedSkill(file, source, cache) {
-  let stat;
+function cachedSkill(file, source, cache, knownStat) {
+  let stat = knownStat;
   try {
-    stat = fs.statSync(file);
+    stat ??= fs.statSync(file);
   } catch {
     return null;
   }
@@ -50,47 +52,39 @@ function cachedSkill(file, source, cache) {
   return skill;
 }
 
-function findSkillFiles(folder, walk) {
-  let real;
+function walkRealFolder(real, walk) {
+  if (walk.visited.has(real)) return [];
+  walk.visited.add(real);
   let entries;
   try {
-    real = fs.realpathSync.native(folder);
     entries = fs.readdirSync(real, { withFileTypes: true });
   } catch {
     return [];
   }
-  if (walk.visited.has(real)) return [];
-  walk.visited.add(real);
   const found = [];
   for (const entry of entries) {
     if (walk.entriesLeft-- <= 0) break;
     const entryPath = path.join(real, entry.name);
     if (isServiceFolderName(entry.name) || walk.skipped.some((skipped) => samePath(skipped, entryPath))) continue;
-    if (entry.isDirectory() || (entry.isSymbolicLink() && isFolder(entryPath))) {
-      found.push(...findSkillFiles(entryPath, walk));
-    } else if (entry.name === SKILL_FILE && isFile(entryPath)) {
-      found.push(entryPath);
-    }
+    if (entry.isDirectory()) found.push(...walkRealFolder(entryPath, walk));
+    else if (entry.isSymbolicLink()) found.push(...followLink(entryPath, walk));
+    else if (entry.name === SKILL_FILE && entry.isFile()) found.push({ file: entryPath });
   }
   return found;
 }
 
 const isServiceFolderName = (name) => name.startsWith('.') || name === 'node_modules';
 
-function isFolder(link) {
+function followLink(link, walk) {
+  let stat;
   try {
-    return fs.statSync(link).isDirectory();
+    stat = fs.statSync(link);
   } catch {
-    return false;
+    return [];
   }
-}
-
-function isFile(entryPath) {
-  try {
-    return fs.statSync(entryPath).isFile();
-  } catch {
-    return false;
-  }
+  if (!stat.isDirectory()) return path.basename(link) === SKILL_FILE && stat.isFile() ? [{ file: link, stat }] : [];
+  const target = existingRealPath(link);
+  return target ? walkRealFolder(target, walk) : [];
 }
 
 const text = (value) => (typeof value === 'string' ? value : '');
