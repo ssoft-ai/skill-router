@@ -9,7 +9,7 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "mcp__plugin_skill-router_skill-router__(search_skills|load_skill)",
+        "matcher": "^mcp__plugin_.+_skill-router__(search_skills|load_skill)$",
         "hooks": [
           { "type": "command", "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/shown-skills.js\"" }
         ]

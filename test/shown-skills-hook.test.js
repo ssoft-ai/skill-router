@@ -96,9 +96,9 @@ test('shows nothing for an input it cannot read', () => {
 test('runs after the search and the load of the router and after no other tool', () => {
   const matchers = JSON.parse(fs.readFileSync(hooksFile, 'utf8')).hooks.PostToolUse
     .filter((entry) => entry.hooks.some((hook) => hook.command.includes('shown-skills.js')))
-    .map((entry) => new RegExp(`^(?:${entry.matcher})$`));
+    .map((entry) => new RegExp(entry.matcher));
   const runsAfter = (tool) => matchers.some((matcher) => matcher.test(tool));
   assert.deepStrictEqual(
-    [`${TOOL}search_skills`, `${TOOL}load_skill`, `${TOOL}other`, 'Read', 'mcp__other__search_skills'].map(runsAfter),
-    [true, true, false, false, false]);
+    [`${TOOL}search_skills`, `${TOOL}load_skill`, `${TOOL}other`, 'Read', 'mcp__other__search_skills', `${TOOL}search_skills_preview`, 'mcp__plugin_skill-router-dev_skill-router__load_skill'].map(runsAfter),
+    [true, true, false, false, false, false, true]);
 });

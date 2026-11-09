@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 'use strict';
+const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 const { readSkill } = require('../src/index');
@@ -29,7 +30,9 @@ function messageFor({ tool_name: tool, tool_response: response }) {
     const shown = loadedFolder(text);
     if (shown === null) return null;
     const folder = shown.replace(/^~(?=[\\/])/, os.homedir());
-    return `Skill loaded: ${oneLine(readSkill(path.join(folder, 'SKILL.md'))?.name ?? path.basename(folder))}`;
+    const file = path.join(folder, 'SKILL.md');
+    const size = fs.statSync(file, { throwIfNoEntry: false })?.size;
+    return `Skill loaded: ${oneLine(readSkill(file, undefined, size)?.name ?? path.basename(folder))}`;
   }
   return null;
 }
