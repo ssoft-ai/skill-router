@@ -4,6 +4,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const LOAD_GRADER = /^loads-/;
+const ABSENCE_GRADER = /^loads-no-/;
 const TURN_LIMIT = /Reached maximum number of turns/;
 const MIN_RUNS = 3;
 const DEFAULT_THRESHOLD = 0.8;
@@ -14,20 +15,21 @@ function loadShare(result, expectedCases) {
   const measured = new Set(result.cases.map((c) => c.name));
   const missing = expectedCases.filter((name) => !measured.has(name));
   if (missing.length > 0) throw new Error(`the result holds no run of ${missing.join(', ')}`);
-  const byLanguage = {};
+  const byGroup = {};
   for (const evalCase of result.cases) {
     const caseRuns = evalCase.arms.with;
     if (caseRuns.length < MIN_RUNS) throw new Error(`${evalCase.name} ran ${caseRuns.length} times, fewer than three runs`);
-    const share = (byLanguage[evalCase.name.split('-')[0]] ??= { loaded: 0, runs: 0 });
+    const share = (byGroup[evalCase.name.split('-')[0]] ??= { passed: 0, runs: 0 });
     for (const run of caseRuns) {
       if (run.error && !TURN_LIMIT.test(run.error)) throw new Error(`a run of ${evalCase.name} ended in an error: ${run.error}`);
-      const grader = run.graders.find((g) => LOAD_GRADER.test(g.name));
-      if (!grader) throw new Error(`a run of ${evalCase.name} carries no load grader`);
+      const graders = run.graders.filter((g) => LOAD_GRADER.test(g.name));
+      if (graders.length === 0) throw new Error(`a run of ${evalCase.name} carries no load grader`);
       share.runs++;
-      if (grader.passed) share.loaded++;
+      const passesOnAbsence = graders.every((g) => ABSENCE_GRADER.test(g.name));
+      if (graders.every((g) => g.passed) && !(passesOnAbsence && TURN_LIMIT.test(run.error ?? ''))) share.passed++;
     }
   }
-  return byLanguage;
+  return byGroup;
 }
 
 const stdio = {
@@ -46,20 +48,20 @@ function main([resultPath, thresholdArg], io = stdio) {
     io.err(`the threshold ${thresholdArg} is no number from 0 to 1\n`);
     return 1;
   }
-  let byLanguage;
+  let byGroup;
   try {
-    byLanguage = loadShare(JSON.parse(fs.readFileSync(resultPath, 'utf8')), fs.readdirSync(CASES_DIR));
+    byGroup = loadShare(JSON.parse(fs.readFileSync(resultPath, 'utf8')), fs.readdirSync(CASES_DIR));
   } catch (error) {
     io.err(`${error.message}\n`);
     return 1;
   }
   let reached = true;
-  for (const [language, { loaded, runs }] of Object.entries(byLanguage)) {
-    const rate = loaded / runs;
+  for (const [group, { passed, runs }] of Object.entries(byGroup)) {
+    const rate = passed / runs;
     reached &&= rate >= threshold;
-    io.out(`${language}: loaded the expected skill in ${loaded} of ${runs} runs (${rate.toFixed(2)})\n`);
+    io.out(`${group}: passed in ${passed} of ${runs} runs (${rate.toFixed(2)})\n`);
   }
-  io.out(`threshold ${threshold} for every language: ${reached ? 'reached' : 'missed'}\n`);
+  io.out(`threshold ${threshold} for every group of cases: ${reached ? 'reached' : 'missed'}\n`);
   return reached ? 0 : 1;
 }
 
