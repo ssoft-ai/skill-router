@@ -49,14 +49,17 @@ function validSearchArguments({ query, limit }) {
   return { query, limit };
 }
 
+const oneLine = (text) => text.replace(/\s+/g, ' ').trim();
+
 function searchText(results, shown) {
   return results.flatMap(({ name, skills }) => {
     const byDescription = new Map();
     for (const skill of skills) {
-      const folders = byDescription.get(skill.description) ?? [];
-      byDescription.set(skill.description, [...folders, `  ${shown(path.dirname(skill.path))}`]);
+      const description = oneLine(skill.description);
+      const folders = byDescription.get(description) ?? [];
+      byDescription.set(description, [...folders, `  ${shown(path.dirname(skill.path))}`]);
     }
-    return [name, ...[...byDescription].flatMap(([description, folders]) => [...folders, `  ${description}`])];
+    return [oneLine(name), ...[...byDescription].flatMap(([description, folders]) => [...folders, `  ${description}`])];
   }).join('\n');
 }
 

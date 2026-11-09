@@ -100,6 +100,19 @@ test('lists under one name the folders of its skills, each description once afte
   ].sort()]);
 });
 
+test('shows a description written over several lines on one indented line', () => {
+  const folder = path.join(dir, 'block-descriptions');
+  for (const [name, marker] of [['literal-notes', '|'], ['folded-notes', '>']]) {
+    fs.mkdirSync(path.join(folder, name), { recursive: true });
+    fs.writeFileSync(path.join(folder, name, 'SKILL.md'), `---\nname: ${name}\ndescription: ${marker}\n  Apply when notes\n  are written\n---\n`);
+  }
+  const blocks = createRouter({ folders: [folder], env: {}, home: path.join(dir, 'elsewhere'), cwd: dir });
+  const result = blocks.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'search_skills', arguments: { query: 'notes' } } }).result;
+  const lines = result.content[0].text.split('\n');
+  assert.deepStrictEqual([lines.filter((line) => !line.startsWith('  ')).sort(), lines.filter((line) => line.trim() === 'Apply when notes are written').length],
+    [['folded-notes', 'literal-notes'], 2]);
+});
+
 test('answers a search no skill fits in words', () => {
   assert.strictEqual(call('search_skills', { query: 'zzzz qqqq' }).content[0].text, 'No skill fits.');
 });
