@@ -92,8 +92,10 @@ function step5(word) {
   return result;
 }
 
+const LONGEST_STEMMED_WORD = 40;
+
 function stem(word) {
-  if (word.length <= 2 || !/^[a-z]+$/.test(word)) return word;
+  if (word.length <= 2 || word.length > LONGEST_STEMMED_WORD || !/^[a-z]+$/.test(word)) return word;
   let result = step1c(step1b(step1a(word)));
   result = replaceSuffix(result, STEP2, (stemPart) => measure(stemPart) > 0);
   result = replaceSuffix(result, STEP3, (stemPart) => measure(stemPart) > 0);
