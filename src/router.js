@@ -1,20 +1,21 @@
 'use strict';
-const path = require('node:path');
 const { createMcpServer } = require('./mcp');
 const { resolveRoots } = require('./sources');
+const { instructionsText, loadText, searchText } = require('./texts');
 const { createTools } = require('./tools');
 const { version } = require('../package.json');
 
 const MAX_LIMIT = 20;
 
-const INSTRUCTIONS = 'Finds the installed skills that fit a task, including those the session\'s skill list does not '
-  + 'show: call search_skills first, then load_skill for each skill that fits, and follow it.';
+const INSTRUCTIONS = 'Before you read the project, call search_skills to find the installed skills for the task. The '
+  + 'search compares words, not meaning. For each result that fits the task, call load_skill with its folder and follow '
+  + 'the instructions it returns.';
 
 const SEARCH_DEFINITION = {
   name: 'search_skills',
-  description: 'Finds the installed skills that fit a task, best first: under each name, the folder and description '
-    + 'of every skill of that name, to pick from by description and place. Call it when a task starts or turns to '
-    + 'new work.',
+  description: 'Call this tool when a task starts or changes, with the task in a few English words. It returns the '
+    + 'installed skills whose name, description or instructions share the most words with the query, best match first, '
+    + 'each with its folder and description.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -32,11 +33,11 @@ const SEARCH_DEFINITION = {
 
 const LOAD_DEFINITION = {
   name: 'load_skill',
-  description: 'Returns the instructions of a skill search_skills found, and its folder, which the files they name '
-    + 'are read from.',
+  description: 'Returns a found skill\'s instructions, its folder, which the files they name are read from, and '
+    + 'the skills stored inside that folder.',
   inputSchema: {
     type: 'object',
-    properties: { path: { type: 'string', description: 'A folder search_skills returned.' } },
+    properties: { path: { type: 'string', description: 'A folder search_skills or load_skill returned.' } },
     required: ['path'],
   },
 };
@@ -49,15 +50,13 @@ function validSearchArguments({ query, limit }) {
   return { query, limit };
 }
 
-function searchText(results, shown) {
-  return results.flatMap(({ name, skills }) => {
-    const byDescription = new Map();
-    for (const skill of skills) {
-      const folders = byDescription.get(skill.description) ?? [];
-      byDescription.set(skill.description, [...folders, `  ${shown(path.dirname(skill.path))}`]);
-    }
-    return [name, ...[...byDescription].flatMap(([description, folders]) => [...folders, `  ${description}`])];
-  }).join('\n');
+function instructionsWithTree(tools, limit) {
+  try {
+    return instructionsText(INSTRUCTIONS, tools.skillTree(), tools.shownPath, limit);
+  } catch (error) {
+    process.stderr.write(`skill-router: the instructions go without the tree of nested skills: ${error.message}\n`);
+    return INSTRUCTIONS;
+  }
 }
 
 function createRouter({ folders, env, home, cwd }) {
@@ -65,18 +64,15 @@ function createRouter({ folders, env, home, cwd }) {
   return createMcpServer({
     name: 'skill-router',
     version,
-    instructions: INSTRUCTIONS,
+    instructions: instructionsWithTree(tools, Number(env.SKILL_ROUTER_INSTRUCTIONS_LIMIT) || undefined),
     tools: [
       {
         definition: SEARCH_DEFINITION,
-        handler: (args) => searchText(tools.searchSkills(validSearchArguments(args)), tools.shownPath) || 'No skill fits.',
+        handler: (args) => searchText(tools.searchSkills(validSearchArguments(args)), tools.shownPath),
       },
       {
         definition: LOAD_DEFINITION,
-        handler: (args) => {
-          const { folder, instructions } = tools.loadSkill(args);
-          return `Skill folder: ${tools.shownPath(folder)}\n\n${instructions}`;
-        },
+        handler: (args) => loadText(tools.loadSkill(args), tools.shownPath),
       },
     ],
   });

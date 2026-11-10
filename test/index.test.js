@@ -161,7 +161,33 @@ test('lists a skill once when two configured folders overlap', () => {
   assert.deepStrictEqual(index.skills.map((s) => [s.path, s.source]), [[file, 'outer']]);
 });
 
-test('follows a linked folder and stops where a link leads back into a visited one', () => {
+test('reaches a skill beside a folder many chains of links lead into, within the budget', () => {
+  const root = path.join(dir, 'link-fan');
+  const depth = 12;
+  for (let level = 0; level <= depth; level++) fs.mkdirSync(path.join(root, 'store', `l${level}`), { recursive: true });
+  for (let level = 0; level < depth; level++) {
+    for (const name of ['x', 'y']) fs.symlinkSync(path.join(root, 'store', `l${level + 1}`), path.join(root, 'store', `l${level}`, name), 'junction');
+  }
+  fs.symlinkSync(path.join(root, 'store', 'l0'), path.join(root, 'aa-fan'), 'junction');
+  const last = writeSkill(path.join(root, 'zz-last'), 'zz-last');
+  const { skills } = buildIndex([{ folder: root, source: 'test' }], { maxEntries: 1000 });
+  assert.deepStrictEqual(skills.map((s) => s.path), [last]);
+});
+
+test('walks a folder configured twice alike once', (t) => {
+  const root = path.join(dir, 'twice');
+  writeSkill(path.join(root, 'only'), 'only');
+  const readdirSync = fs.readdirSync;
+  const read = [];
+  t.mock.method(fs, 'readdirSync', (folder, ...rest) => {
+    read.push(String(folder));
+    return readdirSync(folder, ...rest);
+  });
+  const { skills } = buildIndex([{ folder: root, source: 'plugin' }, { folder: root, source: 'plugin' }]);
+  assert.deepStrictEqual([skills.length, read.length], [1, 2]);
+});
+
+test('follows a linked folder and stops where a link leads back into a folder the walk is inside', () => {
   const root = path.join(dir, 'links');
   const own = writeSkill(path.join(root, 'own'), 'own');
   const linked = writeSkill(path.join(dir, 'elsewhere', 'linked'), 'linked');
@@ -204,6 +230,13 @@ test('takes the folder name and an empty description when the frontmatter gives 
   fs.writeFileSync(path.join(root, 'listed', 'SKILL.md'), '---\nname: [a, b]\ndescription:\n  key: value\n---\n');
   const [skill] = buildIndex([{ folder: root, source: 'test' }]).skills;
   assert.deepStrictEqual([skill.name, skill.description], ['listed', '']);
+});
+
+test('takes as the name of a skill without one its folder name on one line, each run of space read as one', () => {
+  const root = path.join(dir, 'spaced-folder');
+  fs.mkdirSync(path.join(root, 'my  notes'), { recursive: true });
+  fs.writeFileSync(path.join(root, 'my  notes', 'SKILL.md'), '---\ndescription: Notes.\n---\n');
+  assert.deepStrictEqual(buildIndex([{ folder: root, source: 'test' }]).skills.map((s) => s.name), ['my notes']);
 });
 
 test('describes a skill without a description by the first line of its instructions, heading marks dropped, as Claude Code lists it', () => {

@@ -21,7 +21,8 @@ test('holds the router and starts it on the skills folder of the root', () => {
     assert.ok(fs.existsSync(path.join(root, file)), file);
   }
   const server = JSON.parse(fs.readFileSync(path.join(root, '.mcp.json'), 'utf8')).mcpServers['skill-router'];
-  assert.deepStrictEqual(server.args, ['${CLAUDE_PLUGIN_ROOT}/server.js', '${CLAUDE_PLUGIN_ROOT}/skills']);
+  const plugin = JSON.parse(fs.readFileSync(path.join(__dirname, '..', '.mcp.json'), 'utf8')).mcpServers['skill-router'];
+  assert.deepStrictEqual([server.args, server.env], [['${CLAUDE_PLUGIN_ROOT}/server.js', '${CLAUDE_PLUGIN_ROOT}/skills'], plugin.env]);
 });
 
 test('stores each catalog skill at its path with its name, description, metadata and instructions', () => {

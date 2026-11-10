@@ -2,11 +2,14 @@
 
 The skills come from `test/fixtures/catalog/skills.json`, their instructions from
 `test/fixtures/catalog/bodies/`: a catalog written for these checks, with six domain skills the
-Claude Code listing shows, 31 narrower skills nested inside them that it does not show, and 23 flat
-skills it shows beside them. Each of the 31 nested skills has one task, written in English,
-German, Spanish, Russian and Chinese by an agent that saw the skill names and none of the
-descriptions; a case, `<language>-<skill>`, passes a run when the agent loads that skill through
-`load_skill`.
+Claude Code listing shows, 35 narrower skills nested inside them that it does not show, and 23 flat
+skills it shows beside them. The cases fall in groups named by the first word of the case:
+
+| Group | Cases | A run passes when |
+|---|---|---|
+| a language: `en`, `de`, `es`, `ru`, `zh` | one task for each of 31 nested skills, written in that language by an agent that saw the skill names and none of the descriptions | the agent loads that skill through `load_skill` |
+| `nested` | one task for each of four nested skills described in an organisation's own terms - Beacon, Lumen, Ledger, Kite - written without those terms, so a search may return the domain skill and not the nested one | the agent loads that skill through `load_skill` |
+| `none` | five requests no skill of the catalog applies to | the agent loads no skill |
 
 ## Running
 
@@ -30,10 +33,11 @@ of the tree it is given.
 | `--no-publish` | the report stays local |
 | `--keep-temp` | a failed run is read from its trace, which the run's own temporary folder holds and the run deletes without this flag; each run's `tracePath` in the result names that folder, the only one to remove afterwards |
 
-`scripts/eval-share.js` reports, per language, the share of runs that loaded the expected skill,
-and exits 1 when any language falls below the threshold, 0.8 unless given. It refuses a partial
-run, a run that ended in an error other than the turn limit, fewer than three runs of a case and a
-result missing a case of this folder.
+`scripts/eval-share.js` reports, per group, the share of runs that passed, and exits 1 when any
+group falls below the threshold, 0.8 unless given. A run passes when every
+grader of its case passed, though a run the turn limit ended does not pass a case whose graders
+only check that nothing was loaded. It refuses a partial run, a run that ended in an error other
+than the turn limit, fewer than three runs of a case and a result missing a case of this folder.
 
 ## Limits
 
@@ -42,8 +46,8 @@ result missing a case of this folder.
 - A grader matches the folder of the expected skill only, so a run that loads a listed skill of the
   same concern instead fails.
 - The search matches words, so a skill whose name, description and instructions share none with
-  the agent's query stays out of the results: the agent searched the task for `threat-modelling` as
-  a security review of file sharing, which only the domain skill `security` matches.
+  the agent's query stays out of the results and is reached only through the skill whose folder
+  holds it, as the `nested` cases measure.
 - A grader counts one load of the expected skill and no more, so it does not tell a run that picks
   that skill from a run that loads every result.
 - The queries of `test/fixtures/ranking/queries.json` are the ones the agent wrote for these

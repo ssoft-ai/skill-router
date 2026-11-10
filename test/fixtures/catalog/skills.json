@@ -58,5 +58,9 @@
  {"path": "release-notes/SKILL.md", "name": "release-notes", "description": "Collects merged pull requests since the last tag into a draft of what a version contains. Use when the changes of a version are gathered from version control."},
  {"path": "api-design/SKILL.md", "name": "api-design", "description": "Designs HTTP APIs - resource names, status codes, pagination, versioning and error bodies. Use when a new endpoint or a breaking change to an API is planned."},
  {"path": "dependency-updates/SKILL.md", "name": "dependency-updates", "description": "Updates a project's dependencies in batches, reading changelogs for breaking changes and running the tests after each. Use when packages are outdated or an update bot opens pull requests."},
- {"path": "linux-admin/SKILL.md", "name": "linux-admin", "description": "Administers Linux servers - users, services with systemd, disks, firewall rules and package updates. Use when a server is configured or a service on it does not start."}
+ {"path": "linux-admin/SKILL.md", "name": "linux-admin", "description": "Administers Linux servers - users, services with systemd, disks, firewall rules and package updates. Use when a server is configured or a service on it does not start."},
+ {"path": "operations/beacon-handover/SKILL.md", "name": "beacon-handover", "description": "Hands the Beacon pager rota to the next squad - the Beacon handover note, open Sev tickets and silenced checks. Use when a Beacon rota ends."},
+ {"path": "documents/lumen-brief/SKILL.md", "name": "lumen-brief", "description": "Fills the Lumen brief - one page of Context, Ask, Bet and Exit - for the portfolio council. Use when a Lumen brief is due."},
+ {"path": "data-engineering/ledger-close/SKILL.md", "name": "ledger-close", "description": "Runs the Ledger close - freezes the GL snapshot, matches the Stripe and Mercury feeds in Tally and posts the variance memo. Use when a Ledger close period ends."},
+ {"path": "mobile/kite-switches/SKILL.md", "name": "kite-switches", "description": "Toggles Kite switches per cohort and per build, with a kill switch for every screen. Use when a screen is turned on or off for a cohort."}
 ]

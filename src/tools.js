@@ -25,14 +25,30 @@ function createTools({ roots, home }) {
 
   function loadSkill({ path: requested }) {
     const spellings = indexedSpellings(typeof requested === 'string' ? givenPath(requested) : requested);
-    const skill = spellings.length > 0 && currentIndex().skills
+    const index = spellings.length > 0 ? currentIndex() : { skills: [] };
+    const skill = index.skills
       .find((s) => spellings.some((spelling) => samePath(s.path, spelling) || samePath(s.folder, spelling)));
     const content = skill && readSkillText(skill.path);
-    if (typeof content !== 'string') throw new Error(`not a skill of the index: ${requested}`);
-    return { folder: skill.folder, instructions: parseSkillFile(content).body.replace(/^﻿/, '').replace(/^\s*\n/, '') };
+    if (typeof content !== 'string') throw new Error(`no installed skill at this path: ${requested}`);
+    return {
+      folder: skill.folder,
+      instructions: parseSkillFile(content).body.replace(/^﻿/, '').replace(/^\s*\n/, ''),
+      inside: byName(index.nearestInside(skill.path)),
+    };
   }
 
-  return { searchSkills, loadSkill, shownPath };
+  const skillTree = () => currentIndex().tree();
+
+  return { searchSkills, loadSkill, skillTree, shownPath };
+}
+
+function byName(found) {
+  const groups = new Map();
+  for (const { name, path: file, description } of found) {
+    if (!groups.has(name)) groups.set(name, []);
+    groups.get(name).push({ path: file, description });
+  }
+  return [...groups].sort(([a], [b]) => (a < b ? -1 : 1)).map(([name, named]) => ({ name, skills: named }));
 }
 
 function indexedSpellings(requested) {
