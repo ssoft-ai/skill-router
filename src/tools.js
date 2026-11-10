@@ -29,7 +29,7 @@ function createTools({ roots, home }) {
     const skill = index.skills
       .find((s) => spellings.some((spelling) => samePath(s.path, spelling) || samePath(s.folder, spelling)));
     const content = skill && readSkillText(skill.path);
-    if (typeof content !== 'string') throw new Error(`not a skill of the index: ${requested}`);
+    if (typeof content !== 'string') throw new Error(`no installed skill at this path: ${requested}`);
     return {
       folder: skill.folder,
       instructions: parseSkillFile(content).body.replace(/^﻿/, '').replace(/^\s*\n/, ''),

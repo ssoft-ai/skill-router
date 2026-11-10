@@ -2,7 +2,7 @@
 const path = require('node:path');
 const { oneLine } = require('./one-line');
 
-const NO_SKILL = 'No skill fits.';
+const NO_SKILL = 'No skill shares a word with the query.';
 const FOLDER_LABEL = 'Skill folder: ';
 const INSIDE_LABEL = 'Narrower skills inside this one:';
 const TREE_INTRO = 'Below is the tree of skills stored inside other skills\' folders. Each line is a folder inside the '
@@ -37,7 +37,7 @@ function instructionsText(base, roots, shown, limit = Infinity) {
     const text = head + treeLines(roots, shown, depth).join('\n');
     if (text.length <= limit) return text;
   }
-  const end = 'search_skills finds the skills of the folders not shown.';
+  const end = 'Further folders are not shown; search_skills finds their skills.';
   const headers = new Set(roots.filter(({ nodes }) => !nodes.some((node) => node.rel === '')).map(({ root }) => shown(root)));
   const kept = [];
   let size = head.length + end.length;

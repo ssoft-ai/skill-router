@@ -174,7 +174,7 @@ test('keeps the line of a root folder that is itself a skill where the cut tree 
       [node('inner-skill-with-a-long-folder-name')]));
     const roots = [{ root: '/first', nodes: first }, { root: '/second', nodes: [second] }, { root: '/third', nodes: third }];
     const lines = instructionsText('Base.', roots, (p) => p, 4096).split('\n');
-    if (lines.at(-1).startsWith('search_skills finds')) ends.push(lines.at(-2));
+    if (lines.at(-1).startsWith('Further folders are not shown')) ends.push(lines.at(-2));
   }
   assert.deepStrictEqual([ends.some((line) => line.startsWith('/second (skill rootskill)')), ends.some((line) => ['/first', '/second', '/third'].includes(line))], [true, false]);
 });
@@ -299,7 +299,7 @@ test('returns as one result the skills whose names differ only in their line bre
 });
 
 test('answers a search no skill fits in words', () => {
-  assert.strictEqual(call('search_skills', { query: 'zzzz qqqq' }).content[0].text, 'No skill fits.');
+  assert.strictEqual(call('search_skills', { query: 'zzzz qqqq' }).content[0].text, 'No skill shares a word with the query.');
 });
 
 test('accepts the limits 1 and 20', () => {

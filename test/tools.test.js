@@ -181,7 +181,7 @@ test('shows a path outside the home folder as it is, a sibling whose name starts
   assert.deepStrictEqual(shown, [target, target]);
 });
 
-test('load refuses every path that is not a skill of the index', () => {
+test('load refuses every path that is not an installed skill', () => {
   const refused = [
     path.join(dir, 'outside', 'secret', 'SKILL.md'),
     path.join(skillsDir, 'commit-rules', 'references', 'types.md'),
@@ -190,7 +190,7 @@ test('load refuses every path that is not a skill of the index', () => {
     '',
   ];
   for (const requested of refused) {
-    assert.throws(() => tools.loadSkill({ path: requested }), /not a skill of the index/, requested);
+    assert.throws(() => tools.loadSkill({ path: requested }), /no installed skill at this path/, requested);
   }
 });
 
@@ -205,7 +205,7 @@ test('load refuses a SKILL.md that grew beyond 1 MiB after the index read its si
   const indexed = statSync(file);
   fs.appendFileSync(file, 'x'.repeat(1024 * 1024));
   t.mock.method(fs, 'statSync', (target, ...rest) => (path.basename(String(target)) === 'SKILL.md' ? indexed : statSync(target, ...rest)));
-  assert.throws(() => grown.loadSkill({ path: found.path }), /not a skill of the index/);
+  assert.throws(() => grown.loadSkill({ path: found.path }), /no installed skill at this path/);
 });
 
 test('search returns every skill of one name in a folder in one result, at any depth', () => {
@@ -260,7 +260,7 @@ test('load returns the text a SKILL.md link leads to with the folder of the link
   const expected = { folder, instructions: 'Shared body.\n', inside: [] };
   const loaded = [path.join(root, 'foo', 'SKILL.md'), path.join(root, 'foo')].map((requested) => linked.loadSkill({ path: requested }));
   assert.deepStrictEqual(loaded, [expected, expected]);
-  assert.throws(() => linked.loadSkill({ path: shared }), /not a skill of the index/);
+  assert.throws(() => linked.loadSkill({ path: shared }), /no installed skill at this path/);
 });
 
 test('search reads no SKILL.md again that is unchanged since the previous search', () => {
