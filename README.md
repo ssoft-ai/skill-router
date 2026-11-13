@@ -174,6 +174,9 @@ git clone https://github.com/ssoft-ai/skill-router.git
 codex mcp add skill-router -- node <clone>/server.js
 ```
 
+Codex starts the server and receives both tools; the router has not been checked with a model
+under Codex.
+
 ### Another MCP client
 
 Register a local server started by `node <clone>/server.js` over standard input and output.
