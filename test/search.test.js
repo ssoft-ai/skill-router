@@ -233,6 +233,53 @@ test('leaves the articles, conjunctions and prepositions of a query out of the s
   assert.deepStrictEqual(search([backup, lights], 'backup and restore of the files on a disk').map((r) => r.name), ['backup']);
 });
 
+const FUNCTION_WORDS = ('a an the and or but nor so yet if than because while whether about above across after against along '
+  + 'among around as at before behind below beneath beside besides between beyond by despite down during except for from in '
+  + 'inside into like near of off on onto out outside over per since through throughout till to toward towards under until '
+  + 'up upon via with within without').split(' ');
+
+test('returns no skill for a query made only of articles, conjunctions and prepositions', () => {
+  const words = skill('words', `Apply when ${FUNCTION_WORDS.join(' ')} are written`);
+  assert.deepStrictEqual(search([words], FUNCTION_WORDS.join(' ')), []);
+});
+
+const PRONOUNS = ('me my myself we us our ourselves you your yours yourself yourselves he him his himself she her hers herself '
+  + 'it its itself they them their themselves this that these those').split(' ');
+
+test('leaves the pronouns of a query out of the search', () => {
+  const announcement = skill('announcement', 'Apply when an announcement post is written');
+  const licence = skill('licence', 'Apply when a library is added with its licence and their terms');
+  assert.deepStrictEqual(search([announcement, licence], 'write a post about the tool and its benefits for them').map((r) => r.name), ['announcement']);
+});
+
+test('returns no skill for a query made only of pronouns', () => {
+  const pronouns = skill('pronouns', `Apply when ${PRONOUNS.join(' ')} are written`);
+  assert.deepStrictEqual(search([pronouns], PRONOUNS.join(' ')), []);
+});
+
+test('matches no skill text through the stem of a word left out of a query, before an abbreviation or after it', () => {
+  const stems = skill('stems', 'Apply when one exception is likely, theirs or used');
+  const review = skill('review', 'Apply when a pull request is reviewed');
+  assert.deepStrictEqual(search([stems, review], 'review on their PR for us').map((r) => r.name), ['review']);
+  assert.deepStrictEqual(search([stems, review], 'on like except their us'), []);
+});
+
+test('searches a word sharing its stem with a word left out of the search', () => {
+  const usage = skill('usage', 'Apply when one exception is likely');
+  for (const query of ['one', 'exception', 'likely']) assert.deepStrictEqual(search([usage], query).map((r) => r.name), ['usage'], query);
+});
+
+test('finds no skill for a query word through a preposition sharing its stem', () => {
+  const server = skill('server', 'Apply when it runs on a server like staging, except production');
+  const other = skill('other', 'Apply when a library is added');
+  for (const query of ['ones', 'likely', 'exceptions']) assert.deepStrictEqual(search([server, other], query), [], query);
+});
+
+test('searches the pronouns naming a software term too', () => {
+  const terms = skill('terms', 'Apply when I/O is slow or a merge takes ours, theirs or mine');
+  for (const query of ['i', 'ours', 'theirs', 'mine']) assert.deepStrictEqual(search([terms], query).map((r) => r.name), ['terms'], query);
+});
+
 test('ranks the skills writing a query word in their descriptions above one writing it in its instructions, however many they are', () => {
   const described = Array.from({ length: 6 }, (_, n) => skill(`described${n}`, `Apply when canary ${n} is run`, 'Run the service.'));
   const instructed = skill('instructed', 'Apply when a service is run', 'Run the canary.');

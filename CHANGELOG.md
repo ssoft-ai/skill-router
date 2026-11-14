@@ -6,6 +6,14 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- [search] Stopped searching pronouns such as `it`, `its` and `this` in a query
+
+### Fixed
+
+- [search] Searched a query word sharing its stem with a preposition, such as `exception`, `one` or `likely`
+
 ## [0.2.0] - 2026-11-13
 
 ### Added

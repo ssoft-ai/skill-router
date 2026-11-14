@@ -92,10 +92,13 @@ folder above it. To load a skill, pass load_skill the path down to its line, for
 | an abbreviation of software work and its full form alike | `PR` and `pull request`, `CI` and `continuous integration`, `k8s` and `Kubernetes`; the list: `src/abbreviations.js` |
 | a query in the language its description is written in | the agent writes English queries; Chinese or Japanese text matches only as a whole unbroken run |
 
-The articles, conjunctions and prepositions of a query are not searched. Several skills of one
-name - a copy installed for two agents, an older version in `skills/v1` - form one result, the
-folder and description of each listed so the agent picks by both; copies sharing a description show
-it once.
+A query word is not searched when it is an article, a conjunction, a preposition, or a personal,
+possessive, reflexive or demonstrative pronoun: `it`, `its`, `their`, `this`. A pronoun naming a
+software term too stays searched: `I` of `I/O`, git's `ours` and `theirs`, `mine`.
+
+Several skills of one name - a copy installed for two agents, an older version in `skills/v1` -
+form one result, the folder and description of each listed so the agent picks by both; copies
+sharing a description show it once.
 
 ## Settings
 

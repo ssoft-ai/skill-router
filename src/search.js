@@ -19,14 +19,21 @@ const SCORE_PARTS = [
   { fields: [INSTRUCTIONS], documentFrequencyOver: [NAME, DESCRIPTION, INSTRUCTIONS] },
 ];
 
-const FUNCTION_WORDS = new Set([
+// Matched as written, never as a stem: `one` stems to `on`, `likely` to `like`, `exception` to `except`.
+const UNSEARCHED_WORDS = new Set([
   'a', 'an', 'the', 'and', 'or', 'but', 'nor', 'so', 'yet', 'if', 'than', 'because', 'while', 'whether',
   'about', 'above', 'across', 'after', 'against', 'along', 'among', 'around', 'as', 'at', 'before', 'behind',
-  'below', 'beneath', 'beside', 'between', 'beyond', 'by', 'despite', 'down', 'during', 'except', 'for',
+  'below', 'beneath', 'beside', 'besides', 'between', 'beyond', 'by', 'despite', 'down', 'during', 'except', 'for',
   'from', 'in', 'inside', 'into', 'like', 'near', 'of', 'off', 'on', 'onto', 'out', 'outside', 'over', 'per',
   'since', 'through', 'throughout', 'till', 'to', 'toward', 'towards', 'under', 'until', 'up', 'upon', 'via',
   'with', 'within', 'without',
-].map(stem));
+  // The pronouns naming a software term too stay searched: `I/O`, git's `ours` and `theirs`, `mine`.
+  'me', 'my', 'myself', 'we', 'us', 'our', 'ourselves', 'you', 'your', 'yours', 'yourself', 'yourselves',
+  'he', 'him', 'his', 'himself', 'she', 'her', 'hers', 'herself',
+  'it', 'its', 'itself', 'they', 'them', 'their', 'themselves', 'this', 'that', 'these', 'those',
+]);
+
+const searchedStems = (words) => words.filter((word) => !UNSEARCHED_WORDS.has(word)).map(stem);
 
 function matchWeight(field, { weight, lengthNormalisation, maxLengthFactor = Infinity }, averageLength, token) {
   if (!field.counts.has(token)) return 0;
@@ -84,7 +91,7 @@ function abbreviationsIn(words, table) {
 
 function fieldCounts(text, table) {
   const words = wordsOf(text);
-  const terms = [...words.map(stem), ...abbreviationsIn(words, table).map((abbreviation) => abbreviation.term)];
+  const terms = [...searchedStems(words), ...abbreviationsIn(words, table).map((abbreviation) => abbreviation.term)];
   const counts = new Map();
   for (const term of terms) counts.set(term, (counts.get(term) ?? 0) + 1);
   return { counts, length: words.length };
@@ -95,11 +102,11 @@ function queryTerms(query, table) {
   const terms = [];
   let next = 0;
   for (const { term, start, length } of abbreviationsIn(words, table)) {
-    terms.push(...words.slice(next, start).map(stem), term);
+    terms.push(...searchedStems(words.slice(next, start)), term);
     next = start + length;
   }
-  terms.push(...words.slice(next).map(stem));
-  return [...new Set(terms)].filter((term) => !FUNCTION_WORDS.has(term));
+  terms.push(...searchedStems(words.slice(next)));
+  return [...new Set(terms)];
 }
 
 const caches = new WeakMap();
