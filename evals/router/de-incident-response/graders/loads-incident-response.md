@@ -2,5 +2,5 @@
 type: tool_used
 tool: mcp__plugin_skill-router_skill-router__load_skill
 min: 1
-input_match: 'operations[\\/]+incident-response(?![\w-])'
+input_match: '(?<![\w-])(?:operations[\\/]+)?incident-response(?=(?:[\\/]+SKILL\.md)?[\\/]*(?:"|$))'
 ---

@@ -44,7 +44,8 @@ than the turn limit, fewer than three runs of a case and a result missing a case
 - The agent works in an empty folder: a request it cannot act on there may end before it loads a
   skill.
 - A grader matches the folder of the expected skill only, so a run that loads a listed skill of the
-  same concern instead fails.
+  same concern instead fails. It takes the folder's name alone, as the search shows it, unless
+  another catalog skill's folder has that name.
 - The search matches words, so a skill whose name, description and instructions share none with
   the agent's query stays out of the results and is reached only through the skill whose folder
   holds it, as the `nested` cases measure.

@@ -68,11 +68,11 @@ function createRouter({ folders, env, home, cwd }) {
     tools: [
       {
         definition: SEARCH_DEFINITION,
-        handler: (args) => searchText(tools.searchSkills(validSearchArguments(args)), tools.shownPath),
+        handler: (args) => searchText(tools.searchSkills(validSearchArguments(args)), tools.shortFolder),
       },
       {
         definition: LOAD_DEFINITION,
-        handler: (args) => loadText(tools.loadSkill(args), tools.shownPath),
+        handler: (args) => loadText(tools.loadSkill(args), tools.shownPath, tools.shortFolder),
       },
     ],
   });
