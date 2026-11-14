@@ -11,8 +11,10 @@ function existingRealPath(p) {
   }
 }
 
+const pathKey = (p) => (process.platform === 'win32' ? p.toLowerCase() : p);
+
 function samePath(a, b) {
-  return process.platform === 'win32' ? a.toLowerCase() === b.toLowerCase() : a === b;
+  return pathKey(a) === pathKey(b);
 }
 
-module.exports = { existingRealPath, samePath };
+module.exports = { existingRealPath, pathKey, samePath };

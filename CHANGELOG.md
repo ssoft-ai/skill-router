@@ -9,6 +9,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 ### Changed
 
 - [search] Stopped searching pronouns such as `it`, `its` and `this` in a query
+- [search] Named a found skill's folder by the shortest end of its path no other skill folder shares
+- [router] Loaded a skill by the short folder a search names, refusing an end several skill folders share
 
 ### Fixed
 

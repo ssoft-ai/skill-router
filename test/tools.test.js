@@ -4,7 +4,7 @@ const assert = require('node:assert');
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
-const { createTools } = require('../src/tools');
+const { createTools, fewestTrailingNames } = require('../src/tools');
 
 let dir;
 let skillsDir;
@@ -275,4 +275,81 @@ test('search reads no SKILL.md again that is unchanged since the previous search
   fs.writeFileSync(file, fs.readFileSync(file, 'utf8').replace('aaaa', 'bbbb'));
   fs.utimesSync(file, mtime, mtime);
   assert.deepStrictEqual(cached.searchSkills({ query: 'notes' }).map((r) => r.skills[0].description), ['Apply when notes aaaa are written']);
+});
+
+test('names each skill folder by the fewest trailing folder names no other skill folder ends with', () => {
+  const root = path.join(dir, 'short');
+  for (const relative of ['notes', path.join('v1', 'notes'), path.join('a', 'skills', 'notes'), path.join('b', 'skills', 'notes'), 'release']) {
+    writeNamed(root, relative, path.basename(relative));
+  }
+  const short = createTools({ roots: () => [{ folder: root, source: 'test' }] });
+  const real = fs.realpathSync.native(root);
+  short.searchSkills({ query: 'notes' });
+  assert.deepStrictEqual(
+    ['notes', path.join('v1', 'notes'), path.join('a', 'skills', 'notes'), path.join('b', 'skills', 'notes'), 'release']
+      .map((relative) => short.shortFolder(path.join(real, relative))),
+    [path.join('short', 'notes'), path.join('v1', 'notes'), path.join('a', 'skills', 'notes'), path.join('b', 'skills', 'notes'), 'release']);
+});
+
+test('load takes the short folder a search names, or the end of it naming the SKILL.md, and returns the full folder', () => {
+  const root = path.join(dir, 'short-load');
+  writeNamed(root, 'notes', 'notes');
+  writeNamed(root, path.join('v1', 'notes'), 'notes');
+  const short = createTools({ roots: () => [{ folder: root, source: 'test' }] });
+  const real = fs.realpathSync.native(root);
+  for (const [requested, folder] of [
+    [path.join('v1', 'notes'), path.join(real, 'v1', 'notes')],
+    ['v1/notes', path.join(real, 'v1', 'notes')],
+    [path.join('short-load', 'notes'), path.join(real, 'notes')],
+    [path.join('v1', 'notes', 'SKILL.md'), path.join(real, 'v1', 'notes')],
+  ]) assert.strictEqual(short.loadSkill({ path: requested }).folder, folder, requested);
+});
+
+test('load refuses an end of a path that several skill folders share, naming the short folder of each', () => {
+  const root = path.join(dir, 'short-shared');
+  writeNamed(root, 'notes', 'notes');
+  writeNamed(root, path.join('v1', 'notes'), 'notes');
+  const short = createTools({ roots: () => [{ folder: root, source: 'test' }] });
+  assert.throws(() => short.loadSkill({ path: 'notes' }),
+    (error) => error.message.includes(path.join('short-shared', 'notes')) && error.message.includes(path.join('v1', 'notes')));
+});
+
+test('load refuses an end of a path that only a file inside a skill folder or a folder outside the index has', () => {
+  for (const requested of [path.join('commit-rules', 'references', 'types.md'), path.join('outside', 'secret'), 'secret', 'references', 'ommit-rules']) {
+    assert.throws(() => tools.loadSkill({ path: requested }), /no installed skill at this path/, requested);
+  }
+});
+
+test('loads every skill of the catalog fixture by the short folder the search names, each short folder its own', () => {
+  const root = path.join(dir, 'catalog');
+  const catalog = require('./fixtures/catalog/skills.json');
+  for (const skill of catalog) writeNamed(root, path.dirname(skill.path), skill.name);
+  const short = createTools({ roots: () => [{ folder: root, source: 'test' }] });
+  short.searchSkills({ query: 'any' });
+  const real = fs.realpathSync.native(root);
+  const folders = catalog.map((skill) => path.join(real, path.dirname(skill.path)));
+  const shown = folders.map((folder) => short.shortFolder(folder));
+  assert.deepStrictEqual([new Set(shown).size, folders.filter((folder, i) => short.loadSkill({ path: shown[i] }).folder !== folder)],
+    [catalog.length, []]);
+});
+
+test('load takes a short folder written in other letter case where the file system ignores case', { skip: process.platform !== 'win32' }, () => {
+  const root = path.join(dir, 'short-case');
+  writeNamed(root, path.join('v1', 'notes'), 'notes');
+  writeNamed(root, 'notes', 'notes');
+  const short = createTools({ roots: () => [{ folder: root, source: 'test' }] });
+  assert.strictEqual(short.loadSkill({ path: 'V1/NOTES' }).folder, path.join(fs.realpathSync.native(root), 'v1', 'notes'));
+});
+
+test('load refuses a request naming only a SKILL.md, which every skill folder holds', () => {
+  for (const requested of ['SKILL.md', 'skill.md', `${path.sep}SKILL.md`]) {
+    assert.throws(() => tools.loadSkill({ path: requested }), /no installed skill at this path/, requested);
+  }
+});
+
+test('gives no short folder to a folder whose every ending another folder ends with', () => {
+  const inner = ['skills', 'notes'].join(path.sep);
+  const outer = ['root', 'skills', 'notes'].join(path.sep);
+  const short = fewestTrailingNames([inner, outer]);
+  assert.deepStrictEqual([short.has(inner), short.get(outer)], [false, outer]);
 });

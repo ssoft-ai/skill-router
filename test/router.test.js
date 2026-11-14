@@ -222,11 +222,12 @@ test('lists no file of the project when it searches', (t) => {
   assert.deepStrictEqual(read.filter((folder) => [path.resolve(project), projectRoot].some((root) => folder === root || folder.startsWith(`${root}${path.sep}`))), []);
 });
 
-test('finds a nested skill and loads its instructions by the folder the search returned', () => {
+test('finds a nested skill by its short folder and loads its instructions by that folder, naming the full one', () => {
   const [name, folder, description] = call('search_skills', { query: 'commit message' }).content[0].text.split('\n');
   const loaded = call('load_skill', { path: folder.trim() });
-  assert.deepStrictEqual([name, description, loaded.content[0].text],
-    ['commit-rules', '  Apply when writing commit messages', `Skill folder: ${folder.trim()}\n\nUse the imperative.\n`]);
+  assert.deepStrictEqual([name, folder, description, loaded.content[0].text],
+    ['commit-rules', '  commit-rules', '  Apply when writing commit messages',
+      `Skill folder: ${path.join(fs.realpathSync.native(dir), 'skills', 'nested', 'commit-rules')}\n\nUse the imperative.\n`]);
 });
 
 test('lists under one name the folders of its skills, each description once after the folders sharing it', () => {
@@ -236,17 +237,16 @@ test('lists under one name the folders of its skills, each description once afte
   writeSkill(path.join(folder, 'other'), 'notes', 'Apply when notes of a meeting are written');
   const copies = createRouter({ folders: [folder], env: {}, home: path.join(dir, 'elsewhere'), cwd: dir });
   const result = copies.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'search_skills', arguments: { query: 'notes' } } }).result;
-  const real = fs.realpathSync.native(folder);
   const [name, ...lines] = result.content[0].text.split('\n').map((line) => line.trim());
   const groups = [];
   let folders = [];
   for (const line of lines) {
-    if (path.isAbsolute(line)) folders.push(line);
+    if (!line.startsWith('Apply')) folders.push(line);
     else { groups.push([line, folders.sort()]); folders = []; }
   }
   assert.deepStrictEqual([name, groups.sort()], ['notes', [
-    ['Apply when notes are written', [path.join(real, 'notes'), path.join(real, 'v1', 'notes')].sort()],
-    ['Apply when notes of a meeting are written', [path.join(real, 'other', 'notes')]],
+    ['Apply when notes are written', [path.join('copies', 'notes'), path.join('v1', 'notes')].sort()],
+    ['Apply when notes of a meeting are written', [path.join('other', 'notes')]],
   ].sort()]);
 });
 
@@ -270,11 +270,10 @@ test('lists after the instructions of a loaded skill the skills one level inside
   writeSkill(path.join(folder, 'security'), 'threat-modelling', 'Apply when attacks are mapped');
   writeSkill(path.join(folder, 'security', 'threat-modelling'), 'stride', 'Apply when STRIDE is walked');
   const tree = createRouter({ folders: [folder], env: {}, home: path.join(dir, 'elsewhere'), cwd: dir });
-  const real = fs.realpathSync.native(folder);
   const loaded = tree.handle({ jsonrpc: '2.0', id: 1, method: 'tools/call', params: { name: 'load_skill', arguments: { path: path.join(folder, 'security') } } }).result;
   const [, inside] = loaded.content[0].text.split('Protect the system.\n');
   const listed = inside.split('\n').filter((line) => line && !line.startsWith(' ') && !line.endsWith(':'));
-  assert.deepStrictEqual([listed.sort(), inside.includes(path.join(real, 'security', 'checks', 'secret-scanning')), inside.includes('Apply when attacks are mapped')],
+  assert.deepStrictEqual([listed.sort(), inside.split('\n').includes('  secret-scanning'), inside.includes('Apply when attacks are mapped')],
     [['secret-scanning', 'threat-modelling'], true, true]);
 });
 

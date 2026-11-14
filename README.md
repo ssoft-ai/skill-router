@@ -21,18 +21,26 @@ sequenceDiagram
 
 | Tool | Takes | Returns |
 |---|---|---|
-| `search_skills` | `query` - the task in a few English words; `limit` - 1 to 20, 10 by default | the best matching skills, best first: each name once, then the folder and description of every skill of that name |
-| `load_skill` | `path` - a skill's folder, or the path of its `SKILL.md` | the skill's instructions without the frontmatter, its folder, and the nearest skills stored inside that folder |
+| `search_skills` | `query` - the task in a few English words; `limit` - 1 to 20, 10 by default | the best matching skills, best first: each name once, then the short folder and description of every skill of that name |
+| `load_skill` | `path` - a skill's short folder, its full folder, or the path of its `SKILL.md` | the skill's instructions without the frontmatter, its full folder, and the nearest skills stored inside that folder |
 
 A search for `commit message` returns:
 
 ```
 commit-rules
-  ~/.claude/skills/commit-rules
+  commit-rules
   Apply when writing commit messages
 ```
 
-A load of `~/.claude/skills/mobile` returns:
+A short folder is the shortest end of the full one that no other installed skill's folder ends with:
+
+| Installed skill folders | Short folders |
+|---|---|
+| `~/.claude/skills/commit-rules`, and no other ending with `commit-rules` | `commit-rules` |
+| `~/.claude/skills/notes`, `~/.claude/skills/v1/notes` | `skills/notes`, `v1/notes` |
+| `/skills/notes`, `/root/.claude/skills/notes` | `/skills/notes` in full, `.claude/skills/notes` |
+
+A load of `mobile` returns:
 
 ```
 Skill folder: ~/.claude/skills/mobile
@@ -41,11 +49,14 @@ Skill folder: ~/.claude/skills/mobile
 
 Narrower skills inside this one:
 kite-switches
-  ~/.claude/skills/mobile/kite-switches
+  kite-switches
   Apply when a Kite flag is switched
 ```
 
-`load_skill` answers only a path that resolves to a skill the index holds. Unlike Claude Code's
+`load_skill` answers only a path that resolves to a skill the index holds. An end of a path several
+skill folders share is refused with the short folder of each. A short folder is matched against the
+skills installed at the load, so where a skill is removed after the search and another one's folder
+ends the same way, that one loads; the `Skill folder:` line names it. Unlike Claude Code's
 Skill tool, it substitutes no `$ARGUMENTS` or `${CLAUDE_SKILL_DIR}` and grants no `allowed-tools`.
 
 ## Nested skills

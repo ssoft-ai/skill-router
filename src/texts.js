@@ -22,9 +22,9 @@ function searchText(results, shown) {
   return text || NO_SKILL;
 }
 
-function loadText({ folder, instructions, inside }, shown) {
+function loadText({ folder, instructions, inside }, shown, short) {
   const text = `${FOLDER_LABEL}${shown(folder)}\n\n${instructions}`;
-  return inside.length === 0 ? text : `${text.trimEnd()}\n\n${INSIDE_LABEL}\n${searchText(inside, shown)}`;
+  return inside.length === 0 ? text : `${text.trimEnd()}\n\n${INSIDE_LABEL}\n${searchText(inside, short)}`;
 }
 
 function instructionsText(base, roots, shown, limit = Infinity) {
