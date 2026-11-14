@@ -50,3 +50,20 @@ test('ranks the target of no query lower for the abbreviations it knows than wit
     .map((q) => q.query);
   assert.deepStrictEqual(lowered, []);
 });
+
+const PRONOUNS = ('me my myself we us our ourselves you your yours yourself yourselves he him his himself '
+  + 'she her hers herself it its itself they them their themselves this that these those').split(' ');
+const namesOf = (query) => search(skills, query, { limit: 20 }).map((r) => r.name);
+
+test('ranks the skills for every agent query as it ranks them with each pronoun added', () => {
+  const changed = [...queries, ...queriesByTermTheDescriptionLacks].flatMap(({ query }) => PRONOUNS
+    .filter((pronoun) => JSON.stringify(namesOf(`${query} ${pronoun}`)) !== JSON.stringify(namesOf(query)))
+    .map((pronoun) => `${query} + ${pronoun}`));
+  assert.deepStrictEqual(changed, []);
+});
+
+test('ranks the skills for a query naming a tool and its benefits as for the query without its pronoun', () => {
+  assert.deepStrictEqual(
+    namesOf('write a short announcement post describing a tool and its benefits'),
+    namesOf('write a short announcement post describing a tool and benefits'));
+});
